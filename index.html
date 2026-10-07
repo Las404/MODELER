@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="ko" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MODELER — 모델러 기록</title>
+<meta name="description" content="신화의 유산을 몸에 품은 자들이, 세계의 뒷면에서 새어 나오는 괴수와 인류를 끝내려는 자들을 막아서는 현대.">
+<meta name="theme-color" content="#05070d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%2305070d'/%3E%3Cpath d='M24 6v36' stroke='%2379c3ff' stroke-width='2'/%3E%3Cpath d='M24 6v36' stroke='%23ff3347' stroke-width='2' stroke-dasharray='3 4'/%3E%3Ccircle cx='24' cy='24' r='14' fill='none' stroke='%23d9b56a' stroke-width='1.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif+KR:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script>
+/* 언어 고르기: 주소의 ?lang= → 저장된 선택 → 브라우저 언어 순서. 한국어가 아니면 번역 파일을 먼저 읽는다 */
+(function () {
+  var d = document.documentElement, ok = { ko: 1, en: 1, ja: 1, zh: 1 }, L = 'ko';
+  d.className = 'js';
+  try {
+    var q = new URLSearchParams(location.search).get('lang'), s = localStorage.getItem('modeler.lang');
+    if (q && ok[q]) { L = q; localStorage.setItem('modeler.lang', q); }
+    else if (s && ok[s]) L = s;
+    else {
+      var n = navigator.languages || [navigator.language || 'ko'];
+      L = 'en';
+      for (var i = 0; i < n.length; i++) { var x = String(n[i]).toLowerCase().slice(0, 2); if (ok[x]) { L = x; break; } }
+    }
+  } catch (e) {}
+  window.MODELER_LANG = L;
+  d.lang = L === 'zh' ? 'zh-Hant' : L;
+  d.setAttribute('data-lang', L);
+  if (L !== 'ko') {
+    var f = { ja: 'Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700;900', zh: 'Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700;900' }[L];
+    if (f) document.write('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=' + f + '&display=swap">');
+    document.write('<script src="js/lang/' + L + '.js"><\/script>');
+  }
+})();
+</script>
+</head>
+<body data-world="main" data-view="intro" class="is-intro">
+
+<!-- ═════════ SVG 정의: 필터 · 문장 · 아이콘 ═════════ -->
+<svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 반전세계 진입 시 화면 일그러짐 -->
+    <filter id="warp" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence id="warpNoise" type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap id="warpMap" in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <!-- 세력 문장 -->
+  <symbol id="sig-pantheon" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="24" cy="15" r="6"/><path d="M24 3v3M24 24v-3M12 15h3M33 15h3M15.5 6.5l2 2M30.5 6.5l-2 2"/><path d="M8 26h32M10 26v14M17 26v14M24 26v14M31 26v14M38 26v14M6 42h36"/></g></symbol>
+  <symbol id="sig-karasu" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M6 20c8-2 12-8 18-8s9 3 11 6l7 1-6 3c-1 6-6 11-13 12l-2 6M21 33l-3 7M27 32l2 8"/><circle cx="30" cy="17" r="1.4" fill="currentColor"/><path d="M6 20c5 3 9 4 14 3"/></g></symbol>
+  <symbol id="sig-muspel" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M24 4c3 7 10 10 10 19a10 10 0 0 1-20 0c0-5 3-7 4-11 2 3 2 5 4 6 1-5 0-9 2-14Z"/><path d="M24 44c-9 0-16-4-18-10M24 44c9 0 16-4 18-10"/><circle cx="24" cy="26" r="3"/></g></symbol>
+  <symbol id="sig-oracle" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 24c6-9 13-13 20-13s14 4 20 13c-6 9-13 13-20 13S10 33 4 24Z"/><circle cx="24" cy="24" r="6"/><path d="M24 4v4M24 40v4M8 9l3 3M40 9l-3 3"/></g></symbol>
+  <symbol id="sig-free" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M24 6a18 18 0 1 1-15.6 9"/><path d="M14 6l-5.6 9 9.6 1"/><circle cx="24" cy="24" r="4"/></g></symbol>
+  <symbol id="sig-border" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M24 4v40"/><path d="M8 14h12M8 24h12M8 34h12" opacity=".5"/><path d="M28 14h12M28 24h12M28 34h12" stroke-dasharray="2 3"/></g></symbol>
+
+  <!-- 아이콘 -->
+  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></g></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></g></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/></g></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-crack" viewBox="0 0 24 24"><path d="M12 2 10 8l4 3-3 4 2 3-1 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3Z"/></g></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 5h2v14H6zM19 5.5v13L9.5 12Z" fill="currentColor"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM5 5.5v13l9.5-6.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2.2 0 3.5 1.2 4.6 3l1.8 3.2c1 1.8 2.4 3.3 4.6 3.3H21"/><path d="M3 17h3.5c1.6 0 2.7-.6 3.6-1.6M13.5 8.6c.9-1 2-1.6 3.6-1.6H21"/><path d="m18 4 3 3-3 3M18 14l3 3-3 3"/></g></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V9a3 3 0 0 1 3-3h13M17 3l3 3-3 3"/><path d="M20 13v2a3 3 0 0 1-3 3H4M7 21l-3-3 3-3"/></g></symbol>
+  <symbol id="i-repeat1" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V9a3 3 0 0 1 3-3h13M17 3l3 3-3 3"/><path d="M20 13v2a3 3 0 0 1-3 3H4M7 21l-3-3 3-3"/></g><text x="12" y="14.6" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor" font-family="sans-serif">1</text></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></g></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9Z"/><path d="m17 9 5 6M22 9l-5 6"/></g></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></g></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h11M4 12h11M4 18h7"/><path d="M18 9v9" /><circle cx="16" cy="18" r="2.2"/><path d="M18 9l3-1"/></g></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+  <symbol id="i-replay" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/><path d="M10.5 9.2v5.6l4.4-2.8Z" fill="currentColor" stroke-width="1.2"/></g></symbol>
+</svg>
+
+<!-- ═════════ 배경 ═════════ -->
+<div class="stage" aria-hidden="true">
+  <div class="bg is-on" data-bg="main"><div class="bg__img" style="background-image:url('assets/bg/main.jpg')"></div></div>
+  <div class="bg" data-bg="real"><div class="bg__img" style="background-image:url('assets/bg/real.jpg')"></div></div>
+  <div class="bg" data-bg="reverse"><div class="bg__img" style="background-image:url('assets/bg/reverse.jpg')"></div></div>
+  <div class="stage__tint"></div>
+  <div class="stage__vignette"></div>
+  <div class="stage__grain"></div>
+</div>
+<canvas class="fx" id="fx" aria-hidden="true"></canvas>
+
+<!-- ═════════ 인트로 ═════════ -->
+<div class="intro" id="intro" role="dialog" aria-label="인트로" data-i18n-attr="aria-label:intro.aria">
+  <div class="intro__bg"></div>
+  <div class="intro__door intro__door--l"></div>
+  <div class="intro__door intro__door--r"></div>
+  <div class="intro__seam"></div>
+  <div class="intro__lines" aria-live="polite">
+    <p class="intro__line" data-i18n="intro.l1">신화는 끝나지 않았다.</p>
+    <p class="intro__line" data-i18n="intro.l2">그것은 사람의 몸에 깃들어,</p>
+    <p class="intro__line" data-i18n="intro.l3">세계의 뒷면에서 새어 나온다.</p>
+  </div>
+  <div class="intro__title">
+    <p class="intro__eyebrow">ARCHIVE · 判定記錄 · No.0000</p>
+    <h1 class="intro__logo" data-text="MODELER">MODELER</h1>
+    <p class="intro__sub" data-i18n="intro.sub">신화를 계승한 자들의 기록</p>
+    <button class="intro__enter" id="introEnter" type="button">
+      <span data-i18n="intro.enter">기록 열람</span><i></i>
+    </button>
+  </div>
+  <button class="intro__skip" id="introSkip" type="button">SKIP ›</button>
+  <div class="intro__hud">
+    <span>MODEL RESPONSE · DETECTED</span>
+    <span id="introClock">00:00:00</span>
+  </div>
+</div>
+
+<!-- ═════════ 상단 HUD ═════════ -->
+<header class="hud" id="hud">
+  <a class="hud__logo" href="#world" data-go="world" aria-label="세계관으로" data-i18n-attr="aria-label:hud.home">
+    <span class="hud__mark"></span>
+    <span class="hud__name">MODELER</span>
+  </a>
+  <nav class="hud__nav" id="hudNav" aria-label="주요 메뉴" data-i18n-attr="aria-label:hud.nav">
+    <a href="#world" data-go="world"><b>00</b><span data-i18n="nav.world">세계관</span></a>
+    <a href="#modelers" data-go="modelers"><b>01</b><span data-i18n="nav.modelers">모델러</span></a>
+    <a href="#reverse" data-go="reverse" class="is-danger"><b>02</b><span data-i18n="nav.reverse">반전세계</span></a>
+    <a href="#relations" data-go="relations"><b>03</b><span data-i18n="nav.relations">관계도</span></a>
+  </nav>
+  <div class="hud__tools">
+    <span class="hud__world" id="hudWorld"><i></i><span>現實</span></span>
+    <button class="hud__btn" id="btnIntro" type="button" aria-label="인트로로 돌아가기" title="인트로로 돌아가기" data-i18n-attr="aria-label:hud.intro;title:hud.intro"><svg><use href="#i-replay"/></svg></button>
+    <div class="lang" id="lang">
+      <button class="hud__btn lang__btn" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="언어 / Language" title="언어 / Language"><svg><use href="#i-globe"/></svg><b id="langCur">KO</b></button>
+      <div class="lang__menu" id="langMenu" role="menu" aria-label="Language">
+        <button type="button" role="menuitemradio" data-lang="ko" aria-checked="true"><b>KO</b>한국어</button>
+        <button type="button" role="menuitemradio" data-lang="en" aria-checked="false"><b>EN</b>English</button>
+        <button type="button" role="menuitemradio" data-lang="ja" aria-checked="false"><b>JA</b>日本語</button>
+        <button type="button" role="menuitemradio" data-lang="zh" aria-checked="false"><b>繁中</b>繁體中文</button>
+      </div>
+    </div>
+    <button class="hud__btn hud__secret" id="btnSecret" type="button" aria-pressed="false" aria-label="기밀 보기" title="기밀 보기" data-i18n-attr="aria-label:hud.secret;title:hud.secret"><svg><use href="#i-lock"/></svg></button>
+    <button class="hud__btn" id="btnMusic" type="button" data-m="open" aria-label="플레이리스트 모드" title="플레이리스트 모드" data-i18n-attr="aria-label:hud.music;title:hud.music"><svg><use href="#i-music"/></svg></button>
+    <button class="hud__btn" id="btnSearch" type="button" aria-label="모델러 검색 (Ctrl+K)" title="검색 (Ctrl+K)" data-i18n-attr="aria-label:hud.search;title:hud.search"><svg><use href="#i-search"/></svg></button>
+    <button class="hud__btn hud__menu" id="btnMenu" type="button" aria-label="메뉴" data-i18n-attr="aria-label:hud.menu"><svg><use href="#i-menu"/></svg></button>
+  </div>
+  <div class="ticker" aria-hidden="true"><div class="ticker__label" id="tickerLabel">상황실</div><div class="ticker__track"><div class="ticker__run" id="tickerRun"></div></div></div>
+</header>
+
+<main id="app">
+
+<!-- ════════════════════════════════════════════
+     00 · 세계관
+     ════════════════════════════════════════════ -->
+<section class="view" id="v-world" data-view="world" aria-label="세계관" data-i18n-attr="aria-label:nav.world">
+
+  <!-- 히어로 -->
+  <div class="hero">
+    <p class="eyebrow reveal">CONCEPT <span>·</span> 00</p>
+    <h2 class="hero__title">
+      <span class="reveal" data-i18n="hero.t1">신화의 유산을 몸에 품은 자들이,</span>
+      <span class="reveal" data-i18n="hero.t2">세계의 뒷면에서 새어 나오는 괴수와</span>
+      <span class="reveal" data-i18n-html="hero.t3">인류를 끝내려는 자들을 <em>막아서는 현대.</em></span>
+    </h2>
+    <p class="hero__lead reveal" data-i18n-html="hero.lead">평소엔 균열 토벌 · 조직 생활 · 등급 상승의 이야기.<br>그러나 하늘 저편엔 <strong>라그나로크</strong>라는 먹구름이 깔려 있다.</p>
+    <div class="hero__stats reveal" id="heroStats"></div>
+    <div class="scroll-cue"><span>SCROLL</span><i></i></div>
+  </div>
+
+  <!-- 표면 / 이면 -->
+  <div class="block">
+    <div class="duality reveal" id="duality" tabindex="0" role="button" aria-label="표면과 이면 뒤집기" data-i18n-attr="aria-label:dual.aria">
+      <div class="duality__inner">
+        <div class="duality__face duality__face--front">
+          <p class="eyebrow" data-i18n="dual.fEye">SURFACE · 표면</p>
+          <h3 data-i18n-html="dual.fTitle">히어로 <span>vs</span> 빌런</h3>
+          <p data-i18n="dual.fText">모델러들은 판테온에 소속되어 균열을 막고, 등급을 올리고, 조직 안에서 성장한다. 적은 분명하다. 인류를 끝내려는 무스펠.</p>
+          <span class="duality__hint" data-i18n="dual.fHint">눌러서 뒤집기 ↻</span>
+        </div>
+        <div class="duality__face duality__face--back">
+          <p class="eyebrow" data-i18n="dual.bEye">UNDERSIDE · 이면</p>
+          <h3 data-i18n-html="dual.bTitle">"판테온이 자신의 적을 <em>만들어냈다</em>."</h3>
+          <p data-i18n="dual.bText">진실은 세력 상층부의 극소수만 안다. 대부분의 모델러는 아무것도 모른 채 오늘도 현장을 뛴다.</p>
+          <span class="duality__hint" data-i18n="dual.bHint">다시 눌러서 덮기 ↻</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 시그니처 룰 -->
+  <section class="block" id="w-rule">
+    <header class="block__head reveal">
+      <p class="eyebrow">SIGNATURE RULE <span>·</span> 01</p>
+      <h2 class="block__title" data-i18n="rule.title">이 세계만의 단 하나의 규칙</h2>
+    </header>
+    <blockquote class="rule reveal">
+      <p data-i18n-html="rule.quote">모델 보유자가 죽으면,<br>그 모델은 <em>수십 년간</em> 세상에서 사라진다.</p>
+    </blockquote>
+    <p class="block__text reveal" data-i18n-html="rule.text">모델은 1인 1개, 세상에 단 하나뿐이다. 보유자가 죽으면 그 이후에 태어나는 다음 세대의 랜덤한 인간에게 발현된다. 사망 시점부터 다음 발현자가 자라 각성할 때까지, 수십 년의 공백. 이를 <strong>「공석 모델」</strong>이라 부른다.</p>
+
+    <div class="vacancy reveal" id="vacancy">
+      <div class="vacancy__track">
+        <div class="vacancy__seg vacancy__seg--alive"><span data-i18n="vac.alive">보유자 생존</span></div>
+        <div class="vacancy__seg vacancy__seg--void"><span data-i18n="vac.void">공석 · 수십 년</span></div>
+        <div class="vacancy__seg vacancy__seg--next"><span data-i18n="vac.next">다음 세대 각성</span></div>
+        <i class="vacancy__dot"></i>
+      </div>
+      <div class="vacancy__marks">
+        <span data-i18n-html="vac.m1"><b>✕</b> 보유자 사망</span>
+        <span data-i18n-html="vac.m2"><b>✦</b> 랜덤한 신생아에게 발현</span>
+        <span data-i18n-html="vac.m3"><b>◎</b> 각성 · 판테온 판정</span>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <article class="derive reveal">
+        <span class="derive__no" data-i18n="der.no1">파생 1</span>
+        <h3 data-i18n="der.t1">생포 우선 원칙</h3>
+        <p data-i18n-html="der.p1">적을 죽이면 그 전력이 세상에서 수십 년간 증발한다. 그래서 판테온은 <strong>제압·구금</strong>을 원칙으로 한다.</p>
+      </article>
+      <article class="derive reveal">
+        <span class="derive__no" data-i18n="der.no2">파생 2</span>
+        <h3 data-i18n="der.t2">비대칭 교전</h3>
+        <p data-i18n-html="der.p2">무스펠의 목표는 인류 몰살. 모델이 공석이 되는 건 오히려 방어 전력의 영구 감소, 즉 <strong>이득</strong>이다. 한쪽은 못 죽이고, 한쪽은 마음껏 죽인다.</p>
+      </article>
+      <article class="derive reveal">
+        <span class="derive__no" data-i18n="der.no3">파생 3</span>
+        <h3 data-i18n="der.t3">공석 목록이 상품이 된다</h3>
+        <p data-i18n-html="der.p3">지금 어떤 모델이 비어 있는가. 그것이 <strong>오라클</strong>의 주력 판매 품목이다.</p>
+      </article>
+    </div>
+    <p class="note reveal" data-i18n="rule.note">※ 모델은 랜덤으로 계승되므로 혈통 세습이 불가능하다. 이 세계에 가문 · 명문가는 존재하지 않는다.</p>
+  </section>
+
+  <!-- 02 모델 -->
+  <section class="block" id="w-model">
+    <header class="block__head reveal">
+      <p class="eyebrow">MODEL <span>·</span> 02</p>
+      <h2 class="block__title" data-i18n="model.title">모델 — 이능의 정체</h2>
+    </header>
+    <div class="split">
+      <div class="reveal">
+        <p class="block__text" data-i18n-html="model.text">신화 속 존재가 개인에게 발현된 것. 표기는 <code class="tag-model">MODEL: 엑스칼리버</code>. 모델을 지닌 자를 <strong>모델러</strong>, 모델을 악용해 범죄에 이용하는 자를 <strong class="t-danger">브레이커</strong>라 부른다.</p>
+        <ul class="facts">
+          <li data-i18n-html="model.f1"><b>선천적</b>후천적 획득·양도 불가. 유일한 예외는 금기 기술.</li>
+          <li data-i18n-html="model.f2"><b>1인 1모델</b>세상에 하나뿐. 중복은 없다.</li>
+          <li data-i18n-html="model.f3"><b>출력</b>평균은 주신 › 신격 › 반신 순. 그러나 개인 역량으로 역전 가능.</li>
+          <li data-i18n-html="model.f4"><b>은닉 불가</b>능력을 조금이라도 쓰면 티가 난다.</li>
+          <li data-i18n-html="model.f5"><b>격 ≠ 등급</b>「모델 격」과 「보유자 등급」을 분리 표기한다. "격 S에 보유자 E" 같은 미완성 재능이 성립한다.</li>
+        </ul>
+      </div>
+      <div class="aether-card reveal" id="aetherCard">
+        <p class="eyebrow">靈力 · AETHER</p>
+        <h3 data-i18n="aether.title">영력</h3>
+        <p data-i18n="aether.text">모델을 구동하는 에너지. 총량은 태어날 때 정해진다.</p>
+        <div class="gauge">
+          <div class="gauge__row is-fixed"><span data-i18n="aether.total">총량</span><div class="gauge__bar"><i style="--v:.72"></i></div><em data-i18n="aether.fixed">고정</em></div>
+          <div class="gauge__row"><span data-i18n="aether.eff">운용 효율</span><div class="gauge__bar"><i style="--v:.45"></i></div><em data-i18n="aether.train">단련 ↑</em></div>
+          <div class="gauge__row"><span data-i18n="aether.rec">회복 속도</span><div class="gauge__bar"><i style="--v:.58"></i></div><em data-i18n="aether.train">단련 ↑</em></div>
+          <div class="gauge__row"><span data-i18n="aether.comp">압축률</span><div class="gauge__bar"><i style="--v:.36"></i></div><em data-i18n="aether.train">단련 ↑</em></div>
+        </div>
+        <p class="aether-card__foot" data-i18n-html="aether.foot">시간이 지나면 자연 회복된다. 전부 소진하면 회복될 때까지 사용 불가. 이것이 모델의 <strong>유일한 대가</strong>다.</p>
+      </div>
+    </div>
+    <h3 class="sub-title reveal"><span class="sub-title__t" data-i18n="model.cats">모델 분류</span> <span>7</span></h3>
+    <div class="cats" id="catGrid"></div>
+  </section>
+
+  <!-- 03 해방 -->
+  <section class="block" id="w-release">
+    <header class="block__head reveal">
+      <p class="eyebrow">RELEASE <span>·</span> 03</p>
+      <h2 class="block__title" data-i18n-html="rel.title">해방 <small>解放</small></h2>
+    </header>
+    <p class="block__text reveal" data-i18n-html="rel.text">보유자마다 고유한 해방명을 지닌 필살기. 해방을 사용하면 능력 100%의 상한을 넘어 <strong>한계 돌파</strong>를 행한다. 사용 조건은 <strong>S급 이상</strong>. 극소수만 가능하기에, 이것이 세계의 실질적인 계급선이다.</p>
+    <div class="rules reveal" id="releaseRules">
+      <div><b data-i18n="rel.k1">영역</b><p data-i18n="rel.v1">주변이 그 모델의 신화를 따라 변질된다. 현실과 분리된 공간이며, 내부 현상은 전부 실재로 작동한다.</p></div>
+      <div><b data-i18n="rel.k2">포함 대상</b><p data-i18n="rel.v2">민간인은 배제. 모델 보유자만 갇히거나 가둘 수 있다.</p></div>
+      <div><b data-i18n="rel.k3">변형</b><p data-i18n="rel.v3">모델에 따라 1:1 단독 교전을 강제하는 영역도 존재한다.</p></div>
+      <div><b data-i18n="rel.k4">디버프</b><p data-i18n="rel.v4">갇힌 상대는 영역 주인의 신화 특성에 따른 불리 효과를 받는다. 확정 낙뢰, 둔화 등.</p></div>
+      <div><b data-i18n="rel.k5">지속</b><p data-i18n="rel.v5">체력 한계까지. 통상 약 5분.</p></div>
+      <div><b data-i18n="rel.k6">충돌</b><p data-i18n="rel.v6">동시 해방 시 강한 쪽이 주도권. 비등하면 양측 모두 해방 실패.</p></div>
+      <div><b data-i18n="rel.k7">파훼</b><p data-i18n="rel.v7">압도적 격차라면 영역 자체를 부술 수 있다.</p></div>
+      <div class="is-warn"><b data-i18n="rel.k8">파훼 시</b><p data-i18n="rel.v8">시전자 한계돌파 수치 ½, 디버프 전부 해제, 배경 소멸.</p></div>
+      <div class="is-warn"><b data-i18n="rel.k9">후유증</b><p data-i18n="rel.v9">이후 1주간 출력 30%. 돌파 폭이 클수록 악화된다.</p></div>
+    </div>
+    <p class="callout reveal" data-i18n-html="rel.callout">해방은 승리 확정이 아니라 <em>판돈을 올리는 행위</em>다. 깨지면, 편 쪽이 더 불리해진다.</p>
+
+    <h3 class="sub-title reveal"><span class="sub-title__t" data-i18n="rel.gallery">기록된 해방</span> <span>8</span></h3>
+    <div class="releases" id="releaseGrid"></div>
+  </section>
+
+  <!-- 04 등급 -->
+  <section class="block" id="w-grade">
+    <header class="block__head reveal">
+      <p class="eyebrow">GRADE <span>·</span> 04</p>
+      <h2 class="block__title" data-i18n="grade.title">등급 체계</h2>
+    </header>
+    <div class="split split--grade">
+      <div class="reveal">
+        <h3 class="mini-title" data-i18n-html="grade.holder">보유자 등급 <small>판테온 검사 · 무소속 포함 전원 의무</small></h3>
+        <ol class="ladder" id="ladder"></ol>
+        <p class="note" data-i18n="grade.oracleNote">오라클은 판테온 자료와 보유자 증언을 바탕으로 별도의 비공식 등급을 내부 운용한다.</p>
+      </div>
+      <div class="reveal">
+        <h3 class="mini-title" data-i18n-html="grade.hazard">재해 등급 <small>모르포스 · 적대 능력자 공통 · 상황실 선포</small></h3>
+        <div class="hazard" id="hazard">
+          <button class="hazard__row" data-h="doom" type="button"><span class="hazard__k">終</span><span class="hazard__n" data-i18n="grade.doom">종말급</span><span class="hazard__d" data-i18n="hz.doomD">인류 존속 위협. 라그나로크 발동 또는 그에 준하는 사태</span><span class="hazard__r" data-i18n-html="hz.doomR">전 조직 총동원 · 민간 · 무소속 강제 소집</span></button>
+          <button class="hazard__row" data-h="cata" type="button"><span class="hazard__k">災</span><span class="hazard__n" data-i18n="grade.cata">재앙급</span><span class="hazard__d" data-i18n="hz.cataD">도시 이상 괴멸 규모</span><span class="hazard__r" data-i18n-html="hz.cataR">S급 투입 · 광역 대피령 · <b>생포 원칙 해제</b></span></button>
+          <button class="hazard__row" data-h="haz" type="button"><span class="hazard__k">害</span><span class="hazard__n" data-i18n="grade.haz">재해급</span><span class="hazard__d" data-i18n="hz.hazD">구역 단위 피해 · 민간인 사상 발생</span><span class="hazard__r" data-i18n-html="hz.hazR">A급 지휘 하 부대 편성 · 반경 봉쇄</span></button>
+        </div>
+        <div class="switch-card" id="roeCard">
+          <div>
+            <p class="eyebrow">RULES OF ENGAGEMENT</p>
+            <p class="switch-card__state"><span data-i18n="roe.label">교전 규칙 —</span> <b id="roeState">생포 우선</b></p>
+          </div>
+          <button class="toggle" id="roeToggle" type="button" role="switch" aria-checked="false" aria-label="재앙급 선포" data-i18n-attr="aria-label:roe.btn"><i></i><span data-i18n="roe.btn">재앙급 선포</span></button>
+        </div>
+        <p class="note" data-i18n-html="grade.note">그 아래 규모는 등급을 선포하지 않고 통상 토벌 임무로 처리한다. 개인에게 상시 지정도 가능하다. ("재앙급 지정 인물") <br><strong>"재앙급 선포" = "죽여도 된다."</strong> 등급이 교전 규칙을 바꾸는 스위치다.</p>
+      </div>
+    </div>
+
+    <!-- 판정 시뮬레이터 -->
+    <div class="judge reveal" id="judge">
+      <div class="judge__form">
+        <p class="eyebrow" data-i18n="judge.eye">SIMULATOR · 등급 판정실</p>
+        <h3 data-i18n="judge.title">당신의 모델은?</h3>
+        <p data-i18n="judge.text">이름을 입력하면 판테온 등급 판정관이 측정합니다. 같은 이름은 언제나 같은 결과가 나옵니다.</p>
+        <form id="judgeForm" autocomplete="off">
+          <input id="judgeName" type="text" maxlength="16" placeholder="이름 입력" aria-label="이름" data-i18n-attr="placeholder:judge.ph;aria-label:judge.name">
+          <button type="submit" data-i18n="judge.go">측정 개시</button>
+        </form>
+      </div>
+      <div class="judge__paper" id="judgePaper" aria-live="polite">
+        <div class="judge__empty">
+          <svg><use href="#sig-pantheon"/></svg>
+          <p data-i18n="judge.wait">판정서 대기 중</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 세력 -->
+  <section class="block" id="w-faction">
+    <header class="block__head reveal">
+      <p class="eyebrow">FACTIONS <span>·</span> 05</p>
+      <h2 class="block__title" data-i18n="fac.title">세력 — 캐릭터의 홈그라운드</h2>
+    </header>
+    <p class="block__text reveal" data-i18n-html="fac.text">세력 간 관계는 협력 · 마찰 · 거래다. 전부가 전쟁 구도는 아니다. 명확한 적대는 단 하나, <strong class="t-danger">무스펠</strong>뿐.</p>
+    <div class="factions" id="factionGrid"></div>
+  </section>
+
+  <!-- 06 라그나로크 · 이면 -->
+  <section class="block" id="w-ragnarok">
+    <header class="block__head reveal">
+      <p class="eyebrow">THREAT <span>·</span> 06</p>
+      <h2 class="block__title" data-i18n="rag.title">배경 위협 — 라그나로크</h2>
+    </header>
+    <div class="ragna reveal">
+      <p class="block__text" data-i18n-html="rag.text">무스펠이 추진하는 인류 몰살 의식. 반전세계와 현실세계를 강제로 연결해 모르포스를 동시다발로 쏟아낸다. <strong>발동하면 되돌릴 수 없다.</strong></p>
+      <div class="equation">
+        <div class="equation__term"><b>10,000</b><span data-i18n="rag.souls">인류의 영혼</span></div>
+        <div class="equation__op">+</div>
+        <div class="equation__term is-key"><b>1</b><span data-i18n-html="rag.key">신화 대표급 모델 보유자의 영혼<br><small>신화권 무관 · 생체 확보 필수</small></span></div>
+        <div class="equation__op">=</div>
+        <div class="equation__term is-end"><b>終</b><span data-i18n="rag.end">라그나로크</span></div>
+      </div>
+      <div class="grid-3 grid-3--tight">
+        <p class="feel" data-i18n-html="rag.f1"><b>잦아지는 습격</b>무스펠의 도시 습격은 영혼 수집 과정이다. 학살은 목적이 아니라 수단.</p>
+        <p class="feel" data-i18n-html="rag.f2"><b>사라지는 대표급 보유자</b>판테온은 전 신화권의 대표급을 전부 지켜야 하는 수비 불리 구도.</p>
+        <p class="feel" data-i18n-html="rag.f3"><b>집계되는 숫자</b>어딘가의 장부에, 오늘도 숫자가 하나씩 적힌다.</p>
+      </div>
+    </div>
+
+    <div class="classified reveal" id="classified">
+      <div class="classified__head">
+        <span class="classified__stamp">極秘</span>
+        <div>
+          <p class="eyebrow" data-i18n="cls.eye">CLASSIFIED · 판테온 내부 문서 · 열람 등급 S 이상</p>
+          <h3 data-i18n="cls.title">이면 — 판테온의 과거</h3>
+        </div>
+      </div>
+      <p class="classified__body" data-i18n-html="cls.body">
+        판테온은 <span class="redact">30년 전</span>, <span class="redact">모델 보유자를 대상으로 비인도적 실험</span>을 자행했고, <span class="redact">은폐했다</span>.
+        무스펠 간부 다수가 <span class="redact">그 피해자 출신</span>이다.
+        판테온 내부에서도 이 사실을 아는 사람은 <span class="redact">극소수</span>다.
+      </p>
+      <button class="btn-ghost" id="declassify" type="button" data-i18n="cls.btn">기밀 해제 요청</button>
+    </div>
+  </section>
+
+  <!-- 07 지리 · 용어 -->
+  <section class="block" id="w-geo">
+    <header class="block__head reveal">
+      <p class="eyebrow">GEOGRAPHY <span>·</span> 07</p>
+      <h2 class="block__title" data-i18n="geo.title">세 겹의 세계</h2>
+    </header>
+    <div class="split">
+      <div class="layers reveal" id="layers" aria-label="현실 · 경계 · 반전세계 구조도" data-i18n-attr="aria-label:geo.aria">
+        <div class="layers__plane layers__plane--real" style="--i:0">
+          <span class="layers__name" data-i18n="geo.real">現實 · 현실 — 일본</span>
+          <span class="pin" style="left:44%;top:40%" data-i18n-html="geo.pinPantheon">판테온 본부<small>도쿄</small></span>
+          <span class="pin" style="left:70%;top:62%" data-i18n-html="geo.pinKarasu">카라스 사무소<small>도쿄 변두리</small></span>
+          <span class="pin pin--crack" style="left:18%;top:68%" data-i18n-html="geo.pinRift">균열<small>전국 랜덤</small></span>
+        </div>
+        <div class="layers__plane layers__plane--border" style="--i:1">
+          <span class="layers__name" data-i18n="geo.border">境界 · 경계 공간</span>
+          <span class="pin pin--oracle" style="left:52%;top:46%" data-i18n-html="geo.pinOracle">오라클<small>도달 불가</small></span>
+        </div>
+        <div class="layers__plane layers__plane--reverse" style="--i:2">
+          <span class="layers__name" data-i18n="geo.reverse">反轉 · 반전세계</span>
+          <span class="pin pin--muspel" style="left:36%;top:52%" data-i18n-html="geo.pinMuspel">무스펠<small>거점</small></span>
+        </div>
+      </div>
+      <div class="reveal">
+        <p class="block__text" data-i18n="geo.text">무대는 현대 일본. 실존 지명을 쓰고, 중심은 도쿄다. 검은 균열은 전국 어디서든 랜덤하게 발생하며, 대도시엔 상주 대응팀이 배치되어 있다.</p>
+        <dl class="glossary" id="glossary">
+          <div><dt data-i18n="gl.t1">모델러</dt><dd data-i18n="gl.d1">모델을 지닌 자.</dd></div>
+          <div><dt data-i18n="gl.t2">브레이커</dt><dd data-i18n="gl.d2">모델을 악용해 범죄에 이용하는 자.</dd></div>
+          <div><dt data-i18n="gl.t3">공석 모델</dt><dd data-i18n="gl.d3">보유자 사망 후 다음 발현자가 각성하기 전까지 비어 있는 모델.</dd></div>
+          <div><dt data-i18n="gl.t4">균열</dt><dd data-i18n="gl.d4">현실에 랜덤하게 열리는 검은 틈. 모르포스가 이곳으로 나온다.</dd></div>
+          <div><dt data-i18n="gl.t5">모르포스</dt><dd><span data-i18n="gl.d5">꿈 · 감정 · 공포 · 신화 속 괴물이 형상화된 괴수.</span> <a href="#reverse" data-go="reverse" data-i18n="gl.d5link">반전세계 기록 ›</a></dd></div>
+          <div><dt data-i18n="gl.t6">생포 우선 원칙</dt><dd data-i18n="gl.d6">적을 죽이지 않고 제압 · 구금하는 판테온의 교전 원칙.</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 다음으로 -->
+  <div class="next reveal">
+    <p class="eyebrow">NEXT · 01</p>
+    <h2 data-i18n="next.title">현실 세계의 모델러들</h2>
+    <p data-i18n="next.text">판테온, 카라스 사무소, 무소속, 그리고 경계의 오라클.</p>
+    <button class="btn-main" type="button" data-go="modelers"><span data-i18n="next.btn">모델러 기록 열람</span><svg><use href="#i-right"/></svg></button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     01 · 모델러 (현실)
+     ════════════════════════════════════════════ -->
+<section class="view" id="v-modelers" data-view="modelers" aria-label="모델러" data-i18n-attr="aria-label:nav.modelers" hidden>
+  <div class="page-head">
+    <p class="eyebrow" data-i18n-html="mod.eye">現實 · 일반 세계 <span>—</span> TOKYO</p>
+    <h2 class="page-head__title" data-i18n="mod.title">모델러 기록</h2>
+    <p class="page-head__lead" data-i18n="mod.lead">현실에 발을 딛고 사는 모델러들. 소속을 고르고, 카드를 눌러 기록을 열람하세요.</p>
+  </div>
+
+  <div class="ftabs" id="ftabs" role="tablist" aria-label="소속" data-i18n-attr="aria-label:mod.tabs"></div>
+
+  <div class="fbanner" id="fbanner"></div>
+
+  <div class="toolbar" id="toolbar">
+    <label class="search">
+      <svg><use href="#i-search"/></svg>
+      <input id="qInput" type="search" placeholder="이름 · 모델 · 직책 검색" aria-label="검색" data-i18n-attr="placeholder:mod.ph;aria-label:mod.searchAria">
+    </label>
+    <div class="chips" id="catChips" role="group" aria-label="모델 분류 필터" data-i18n-attr="aria-label:mod.catAria"></div>
+    <div class="toolbar__right">
+      <select id="sortSel" aria-label="정렬" data-i18n-attr="aria-label:mod.sortAria">
+        <option value="default" data-i18n="mod.sDefault">기본 순서</option>
+        <option value="grade" data-i18n="mod.sGrade">등급 높은 순</option>
+        <option value="name" data-i18n="mod.sName">이름순</option>
+        <option value="age" data-i18n="mod.sAge">나이 많은 순</option>
+      </select>
+      <button class="btn-icon" id="btnRandom" type="button" title="무작위 모델러" aria-label="무작위 모델러" data-i18n-attr="title:mod.random;aria-label:mod.random"><svg><use href="#i-dice"/></svg></button>
+    </div>
+  </div>
+
+  <div class="cards" id="realCards"></div>
+  <p class="empty" id="realEmpty" hidden data-i18n="mod.empty">조건에 맞는 모델러가 없습니다.</p>
+
+  <div class="gate-cta" id="gateCta">
+    <div class="gate-cta__crack"></div>
+    <div class="gate-cta__body">
+      <p class="eyebrow">WARNING · 反轉反應</p>
+      <h3 data-i18n-html="cta.title">이 너머는 <em>반전세계</em>다.</h3>
+      <p data-i18n="cta.text">사람이 한 명도 없는 검붉은 하늘. 무스펠과 모르포스의 터전.</p>
+      <button class="btn-danger" type="button" data-go="reverse"><svg><use href="#i-crack"/></svg><span data-i18n="cta.btn">균열로 향한다</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     게이트 · 반전세계 진입
+     ════════════════════════════════════════════ -->
+<section class="view view--full" id="v-gate" data-view="gate" aria-label="반전세계 진입" data-i18n-attr="aria-label:gate.aria" hidden>
+  <div class="gate" id="gate">
+    <svg class="gate__cracks" id="gateCracks" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="gate__core">
+      <p class="eyebrow gate__eyebrow">BOUNDARY · 境界</p>
+      <h2 class="gate__title" data-text="反轉世界">反轉世界</h2>
+      <p class="gate__warn" data-i18n-html="gate.warn">일반인 진입 불가.<br>모델 보유자도 일반적인 방법으로는 왕래할 수 없다.</p>
+      <button class="hold" id="holdBtn" type="button" aria-label="길게 눌러 반전세계로 진입" data-i18n-attr="aria-label:gate.holdAria">
+        <svg class="hold__ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="54" class="hold__track"/>
+          <circle cx="60" cy="60" r="54" class="hold__fill" id="holdFill"/>
+        </svg>
+        <span class="hold__label"><svg><use href="#i-crack"/></svg><b id="holdText">길게 누르기</b></span>
+      </button>
+      <p class="gate__tip" data-i18n-html="gate.tip">균열에 손을 대고 <b>꾹 누르세요</b> · <kbd>Space</kbd></p>
+      <button class="gate__back" type="button" data-go="modelers" data-i18n="gate.back">‹ 현실로 돌아가기</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     02 · 반전세계
+     ════════════════════════════════════════════ -->
+<section class="view" id="v-reverse" data-view="reverse" aria-label="반전세계" data-i18n-attr="aria-label:nav.reverse" hidden>
+  <div class="rhero">
+    <p class="eyebrow reveal">REVERSE WORLD <span>·</span> 02</p>
+    <h2 class="rhero__title glitch reveal" data-text="反轉世界">反轉世界</h2>
+    <p class="rhero__lead reveal" data-i18n-html="rv.lead">현실의 일본과 지형도 건물도 거의 같다.<br>다만 <strong>사람이 한 명도 없다.</strong> 그리고 하늘은 검붉다.</p>
+    <div class="rhero__stats reveal">
+      <div><b>0</b><span data-i18n="rv.s1">거주 인원</span></div>
+      <div><b>∞</b><span data-i18n="rv.s2">모르포스</span></div>
+      <div><b id="muspelCount">6</b><span data-i18n="rv.s3">무스펠 구성원</span></div>
+    </div>
+  </div>
+
+  <!-- 반전세계 -->
+  <section class="block">
+    <header class="block__head reveal">
+      <p class="eyebrow">REVERSE <span>·</span> 01</p>
+      <h2 class="block__title" data-i18n-html="rv.title">반전세계 <small>反轉世界</small></h2>
+    </header>
+    <div class="grid-2">
+      <ul class="facts facts--red reveal">
+        <li data-i18n-html="rv.f1"><b>지형</b>현실의 일본과 지형·건물이 거의 동일하다.</li>
+        <li data-i18n-html="rv.f2"><b>인원</b>사람이 단 한 명도 없다.</li>
+        <li data-i18n-html="rv.f3"><b>하늘</b>언제나 검붉은 색.</li>
+        <li data-i18n-html="rv.f4"><b>진입</b>일반인은 진입 불가. 모델 보유자도 일반적인 방법으로는 왕래할 수 없다.</li>
+        <li data-i18n-html="rv.f5"><b>경계</b>현실과의 경계에 오라클이 위치한다.</li>
+      </ul>
+      <div class="secret reveal">
+        <p class="eyebrow" data-i18n="rv.secEye">TOP SECRET · 무스펠 최고 기밀</p>
+        <h3 data-i18n="rv.secTitle">작은 균열의 좌표</h3>
+        <p data-i18n="rv.secText">무스펠만이 자신들만 아는 작은 균열의 위치를 안다. 판테온이 그들을 추격하지 못하는 근본적인 원인이다.</p>
+        <div class="coords" id="coords" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 모르포스 -->
+  <section class="block" id="r-morphos">
+    <header class="block__head reveal">
+      <p class="eyebrow">MORPHOS <span>·</span> 02</p>
+      <h2 class="block__title" data-i18n="mo.title">모르포스</h2>
+    </header>
+    <div class="morphos reveal">
+      <div class="morphos__img" style="background-image:url('assets/place/morphos.jpg')">
+        <span class="morphos__tag" data-i18n="mo.tag">검은 균열 · 출현 기록</span>
+      </div>
+      <div class="morphos__body">
+        <p class="block__text" data-i18n-html="mo.text1">꿈 · 감정 · 공포 · 신화 속 괴물 · 전설이 형상화된 괴수. 반전세계에 서식하며, 현실에 <strong>검은 균열</strong>이 랜덤하게 열릴 때 출현한다.</p>
+        <div class="chips chips--static"><span data-i18n="mo.c1">늑대형</span><span data-i18n="mo.c2">용형</span><span data-i18n="mo.c3">공포의 형상</span><span data-i18n="mo.c4">전설의 재현</span></div>
+        <p class="block__text" data-i18n-html="mo.text2">출현 위치는 예측할 수 없다. 그래서 오라클의 <strong>출현 예측 정보</strong>가 고가에 거래된다.</p>
+      </div>
+    </div>
+
+    <div class="growth reveal" id="growth">
+      <div class="growth__head">
+        <div>
+          <p class="eyebrow" data-i18n="mo.gEye">개체가 늘수록, 출현 빈도는 곱으로 증가한다</p>
+          <h3><span data-i18n="mo.gN">방치된 개체 수</span> <b id="growthN">4</b> → <span data-i18n="mo.gX">출현 빈도</span> <b id="growthX">×16</b></h3>
+        </div>
+        <input type="range" id="growthRange" min="1" max="12" value="4" aria-label="방치된 개체 수" data-i18n-attr="aria-label:mo.gN">
+      </div>
+      <svg class="growth__chart" id="growthChart" viewBox="0 0 600 220" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <p class="note" data-i18n="mo.gNote">상시 토벌이 필수인 이유이자, 라그나로크가 성립하는 근거.</p>
+    </div>
+  </section>
+
+  <!-- 무스펠 -->
+  <section class="block" id="r-muspel">
+    <header class="block__head reveal">
+      <p class="eyebrow">MUSPELL <span>·</span> 03</p>
+      <h2 class="block__title" data-i18n="mu.title">무스펠</h2>
+    </header>
+    <div class="mbanner reveal" style="background-image:url('assets/place/muspel.jpg')">
+      <div class="mbanner__body">
+        <p class="mbanner__motto" data-i18n="mu.motto">"아무도 막아주지 않았다."</p>
+        <p data-i18n="mu.text">인류 몰살 의식 「라그나로크」를 추진하는 세력. 세상에 환멸한 자들과 판테온 실험의 피해자들. 살상에 거리낌이 없다.</p>
+        <div class="mbanner__tags"><span data-i18n="mu.t1">거점 · 반전세계</span><span data-i18n="mu.t2">살상 무제한</span><span data-i18n="mu.t3">실험 피해자 출신 다수</span></div>
+      </div>
+    </div>
+
+    <div class="ledger reveal" id="ledger">
+      <div class="ledger__col">
+        <p class="eyebrow" data-i18n="lg.eye">ELJUDNIR LEDGER · 엘류드니르 장부</p>
+        <h3 data-i18n="lg.title">제물 집계</h3>
+        <div class="ledger__count"><span id="ledgerNum">?,???</span><small>/ 10,000</small></div>
+        <p class="note" data-i18n="lg.note">집계는 히이라기 미유키의 장부에만 적힌다. 외부 열람 불가.</p>
+      </div>
+      <div class="ledger__col">
+        <div class="ledger__slot"><b data-i18n="lg.slot">대표급 모델 보유자</b><span data-i18n="lg.none">미확보</span></div>
+        <ul class="ledger__targets">
+          <li><span data-i18n="lg.target">확보 대상</span><b data-i18n="lg.ex">엑스칼리버</b><em data-i18n="lg.exWho">아사기리 레이 · 카라스</em></li>
+          <li><span data-i18n="lg.target">확보 대상</span><b data-i18n="lg.ac">아킬레우스</b><em data-i18n="lg.acWho">하야세 타케루 · 무소속</em></li>
+        </ul>
+        <p class="note" data-i18n="lg.note2">실행 책임자 — 쿠로이와 유우. 신화권 무관 · 생체 확보 필수.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 금기 기술 -->
+  <section class="block" id="r-taboo">
+    <header class="block__head reveal">
+      <p class="eyebrow">TABOO <span>·</span> 04</p>
+      <h2 class="block__title" data-i18n="tb.title">금기 기술 — 강제 모델 이식</h2>
+    </header>
+    <div class="split">
+      <div class="reveal">
+        <p class="block__text" data-i18n-html="tb.text1">무스펠이 개발한, 모델 후천 획득의 <strong>유일한 예외</strong>. 성공률은 극히 낮아 대부분 사망하거나 인간성을 잃는다.</p>
+        <p class="block__text" data-i18n-html="tb.text2">성공 사례는 단 하나, <a class="t-link" href="#" data-char="kuga">「쿠가」</a>. 공석이던 펜리르를 인위적으로 발현시킨 결과물이다.</p>
+      </div>
+      <div class="taboo reveal" id="taboo" aria-label="강제 이식 시도 기록" data-i18n-attr="aria-label:tb.aria"></div>
+    </div>
+  </section>
+
+  <!-- 무스펠 구성원 -->
+  <section class="block" id="r-members">
+    <header class="block__head reveal">
+      <p class="eyebrow">MEMBERS <span>·</span> 05</p>
+      <h2 class="block__title" data-i18n="mm.title">무스펠 구성원</h2>
+    </header>
+    <p class="block__text reveal" data-i18n-html="mm.text">무스펠은 보유자 등급 대신 판테온이 지정한 <strong>재해 등급</strong>으로 기록된다.</p>
+    <div class="cards cards--muspel" id="muspelCards"></div>
+  </section>
+
+  <div class="next next--return reveal">
+    <p class="eyebrow">RETURN</p>
+    <h2 data-i18n="ret.title">현실로 귀환한다</h2>
+    <p data-i18n="ret.text">균열을 닫고, 사람들이 사는 하늘 아래로.</p>
+    <button class="btn-main" type="button" data-go="modelers"><span data-i18n="ret.btn">현실로 귀환</span><svg><use href="#i-right"/></svg></button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     03 · 관계도
+     ════════════════════════════════════════════ -->
+<section class="view" id="v-relations" data-view="relations" aria-label="관계도" data-i18n-attr="aria-label:nav.relations" hidden>
+  <div class="page-head">
+    <p class="eyebrow">RELATIONS <span>·</span> 03</p>
+    <h2 class="page-head__title" data-i18n="nav.relations">관계도</h2>
+    <p class="page-head__lead" data-i18n="rg.lead">노드를 끌어 움직이고, 눌러서 관계를 확인하세요. 두 번 누르면 기록이 열립니다.</p>
+  </div>
+  <div class="rel">
+    <div class="rel__legend"><div id="relLegend"></div><button class="btn-ghost rel__reset" id="relReset" type="button" data-i18n="rg.reset">배치 초기화</button></div>
+    <div class="rel__stage" id="relStage">
+      <svg id="relSvg" aria-label="캐릭터 관계 그래프" data-i18n-attr="aria-label:rg.aria"></svg>
+    </div>
+    <aside class="rel__panel" id="relPanel">
+      <p class="rel__hint" data-i18n="rg.hint">노드를 선택하세요.</p>
+    </aside>
+  </div>
+
+  <!-- 관계 총정리 -->
+  <section class="rsum" id="relSummary" aria-labelledby="rsTitle">
+    <header class="rsum__head">
+      <div>
+        <p class="eyebrow">SUMMARY · 總整理</p>
+        <h3 class="rsum__title" id="rsTitle" data-i18n="rs.title">관계 총정리</h3>
+        <p class="rsum__lead" data-i18n="rs.lead">모든 관계를 소속별로 한눈에. 이름을 누르면 기록이, 줄을 누르면 위 관계도에서 위치가 표시됩니다.</p>
+      </div>
+      <div class="rsum__tools">
+        <label class="search rsum__search"><svg><use href="#i-search"/></svg><input id="rsInput" type="search" placeholder="이름 · 관계로 찾기" aria-label="관계 검색" data-i18n-attr="placeholder:rs.ph;aria-label:rs.ph"></label>
+        <div class="rsum__mode" role="group" aria-label="보기 방식" data-i18n-attr="aria-label:rs.modeAria">
+          <button type="button" class="is-on" data-mode="group" data-i18n="rs.byGroup">소속별</button>
+          <button type="button" data-mode="person" data-i18n="rs.byPerson">인물별</button>
+        </div>
+      </div>
+    </header>
+    <div class="rsum__body" id="rsBody"></div>
+  </section>
+</section>
+
+</main>
+
+<footer class="foot" id="foot">
+  <p><b>MODELER</b> · <span data-i18n="intro.sub">신화를 계승한 자들의 기록</span></p>
+  <p><button type="button" id="replayIntro" data-i18n="foot.intro">인트로 다시 보기</button> · <span data-i18n="foot.search">Ctrl + K 검색</span></p>
+</footer>
+
+<!-- ═════════ 화면 전환 ═════════ -->
+<div class="warp" id="warp" aria-hidden="true">
+  <div class="warp__slats"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="warp__label"><span id="warpKicker">TRANSFER</span><b id="warpTitle">現實</b><em id="warpSub"></em></div>
+</div>
+<div class="shatter" id="shatter" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<!-- ═════════ 캐릭터 상세 ═════════ -->
+<div class="cmodal" id="cmodal" role="dialog" aria-modal="true" aria-labelledby="cmName" hidden>
+  <div class="cmodal__scrim" data-close></div>
+  <article class="cmodal__panel" id="cmPanel"></article>
+  <button class="cmodal__nav cmodal__nav--prev" id="cmPrev" type="button" aria-label="이전 모델러" data-i18n-attr="aria-label:cm.prev"><svg><use href="#i-left"/></svg></button>
+  <button class="cmodal__nav cmodal__nav--next" id="cmNext" type="button" aria-label="다음 모델러" data-i18n-attr="aria-label:cm.next"><svg><use href="#i-right"/></svg></button>
+</div>
+
+<!-- ═════════ 해방 영역 ═════════ -->
+<div class="domain" id="domain" role="dialog" aria-modal="true" aria-labelledby="dmName" hidden>
+  <div class="domain__img" id="dmImg"></div>
+  <div class="domain__veil"></div>
+  <div class="domain__hanja" id="dmHanja"></div>
+  <div class="domain__body">
+    <p class="eyebrow" id="dmOwner"></p>
+    <h3 class="domain__name" id="dmName"></h3>
+    <p class="domain__desc" id="dmDesc"></p>
+    <div class="domain__meta">
+      <span><span data-i18n="dm.time">영역 지속</span> <b id="dmTimer">05:00</b></span>
+      <button type="button" class="btn-ghost dm__music" id="dmMusic" data-play=""><svg><use href="#i-music"/></svg><span data-i18n="mu.playRelease">해방곡 재생</span></button>
+      <button type="button" class="btn-ghost" id="dmChar" data-i18n="dm.char">보유자 기록</button>
+      <button type="button" class="btn-ghost" data-close data-i18n="dm.close">영역 해제</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ 검색 팔레트 ═════════ -->
+<div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="모델러 검색" data-i18n-attr="aria-label:hud.search" hidden>
+  <div class="palette__scrim" data-close></div>
+  <div class="palette__box">
+    <label class="palette__input"><svg><use href="#i-search"/></svg><input id="palInput" type="text" placeholder="모델러 · 모델 · 세력 검색" autocomplete="off" data-i18n-attr="placeholder:pal.ph"><kbd>ESC</kbd></label>
+    <ul class="palette__list" id="palList" role="listbox"></ul>
+  </div>
+</div>
+
+<!-- ═════════ 음악: 하단 플레이어 ═════════ -->
+<div class="dock" id="dock" role="region" aria-label="음악 플레이어" data-i18n-attr="aria-label:mu.player">
+  <input class="mrange dock__seek" type="range" min="0" max="1000" value="0" step="1" data-m-seek aria-label="재생 위치" data-i18n-attr="aria-label:mu.seek">
+  <button class="dock__info" type="button" data-m="open" aria-label="플레이리스트 모드 열기" data-i18n-attr="aria-label:hud.music">
+    <span class="dock__art"><img data-m-cover src="assets/cover/main.jpg" alt=""><i class="eq" aria-hidden="true"><b></b><b></b><b></b></i></span>
+    <span class="dock__text"><b data-m-title>LAS - MODELER — The Myth Never Ended</b><small data-m-sub></small></span>
+  </button>
+  <div class="dock__ctrl">
+    <button class="mbtn mbtn--sm dock__hide-s" type="button" data-m="shuffle" aria-pressed="true" aria-label="셔플" title="셔플" data-i18n-attr="aria-label:mu.shuffle;title:mu.shuffle"><svg><use href="#i-shuffle"/></svg></button>
+    <button class="mbtn dock__hide-s" type="button" data-m="prev" aria-label="이전 곡" title="이전 곡" data-i18n-attr="aria-label:mu.prev;title:mu.prev"><svg><use href="#i-prev"/></svg></button>
+    <button class="mbtn mbtn--play" type="button" data-m="play" aria-label="재생" title="재생" data-i18n-attr="aria-label:mu.play;title:mu.play"><svg><use href="#i-play"/></svg></button>
+    <button class="mbtn" type="button" data-m="next" aria-label="다음 곡" title="다음 곡" data-i18n-attr="aria-label:mu.next;title:mu.next"><svg><use href="#i-next"/></svg></button>
+    <button class="mbtn mbtn--sm dock__hide-s" type="button" data-m="repeat" aria-label="반복" title="반복" data-i18n-attr="aria-label:mu.repeat;title:mu.repeat"><svg><use href="#i-repeat"/></svg></button>
+  </div>
+  <div class="dock__right">
+    <span class="dock__time"><span data-m-cur>0:00</span> / <span data-m-dur>0:00</span></span>
+    <div class="vol">
+      <button class="mbtn mbtn--sm" type="button" data-m="mute" aria-label="음소거" title="음소거" data-i18n-attr="aria-label:mu.mute;title:mu.mute"><svg><use href="#i-vol"/></svg></button>
+      <input class="mrange vol__bar" type="range" min="0" max="100" value="70" data-m-vol aria-label="볼륨" data-i18n-attr="aria-label:mu.vol">
+    </div>
+    <button class="mbtn" type="button" data-m="open" aria-label="플레이리스트 모드" title="플레이리스트 모드" data-i18n-attr="aria-label:hud.music;title:hud.music"><svg><use href="#i-list"/></svg></button>
+  </div>
+</div>
+
+<!-- ═════════ 음악: 플레이리스트 모드 ═════════ -->
+<div class="music" id="music" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
+  <div class="music__bg" id="mBg"></div>
+  <header class="music__bar">
+    <button class="mbtn" type="button" data-m="close" aria-label="사이트로 돌아가기" title="사이트로 돌아가기" data-i18n-attr="aria-label:mu.close;title:mu.close"><svg><use href="#i-down"/></svg></button>
+    <p class="music__brand"><b>MODELER</b> <span>OST</span> · <span id="mCount"></span></p>
+    <span class="music__bar-sp"></span>
+  </header>
+  <div class="music__main">
+    <section class="music__now">
+      <div class="music__art"><img data-m-cover src="assets/cover/main.jpg" alt=""></div>
+      <div class="music__meta">
+        <p class="eyebrow" id="mGroup"></p>
+        <h2 class="music__title" id="mTitle" data-m-title></h2>
+        <p class="music__sub" data-m-sub></p>
+      </div>
+      <div class="music__seek">
+        <input class="mrange" type="range" min="0" max="1000" value="0" step="1" data-m-seek aria-label="재생 위치" data-i18n-attr="aria-label:mu.seek">
+        <div class="music__times"><span data-m-cur>0:00</span><span data-m-dur>0:00</span></div>
+      </div>
+      <div class="music__ctrl">
+        <button class="mbtn" type="button" data-m="shuffle" aria-pressed="true" aria-label="셔플" title="셔플" data-i18n-attr="aria-label:mu.shuffle;title:mu.shuffle"><svg><use href="#i-shuffle"/></svg></button>
+        <button class="mbtn mbtn--lg" type="button" data-m="prev" aria-label="이전 곡" data-i18n-attr="aria-label:mu.prev"><svg><use href="#i-prev"/></svg></button>
+        <button class="mbtn mbtn--play mbtn--xl" type="button" data-m="play" aria-label="재생" data-i18n-attr="aria-label:mu.play"><svg><use href="#i-play"/></svg></button>
+        <button class="mbtn mbtn--lg" type="button" data-m="next" aria-label="다음 곡" data-i18n-attr="aria-label:mu.next"><svg><use href="#i-next"/></svg></button>
+        <button class="mbtn" type="button" data-m="repeat" aria-label="반복" title="반복" data-i18n-attr="aria-label:mu.repeat;title:mu.repeat"><svg><use href="#i-repeat"/></svg></button>
+      </div>
+      <div class="vol vol--wide">
+        <button class="mbtn mbtn--sm" type="button" data-m="mute" aria-label="음소거" data-i18n-attr="aria-label:mu.mute"><svg><use href="#i-vol"/></svg></button>
+        <input class="mrange vol__bar" type="range" min="0" max="100" value="70" data-m-vol aria-label="볼륨" data-i18n-attr="aria-label:mu.vol">
+      </div>
+      <button class="btn-ghost music__char" id="mChar" type="button" hidden data-i18n="mu.charRec">캐릭터 기록 보기</button>
+    </section>
+    <section class="music__list" aria-label="재생 목록" data-i18n-attr="aria-label:mu.queue">
+      <div class="music__tools">
+        <label class="search"><svg><use href="#i-search"/></svg><input id="mSearch" type="search" placeholder="곡 · 캐릭터 검색" aria-label="곡 검색" data-i18n-attr="placeholder:mu.ph;aria-label:mu.ph"></label>
+        <button class="btn-main music__shuffle-all" type="button" data-m="shuffleAll"><svg><use href="#i-shuffle"/></svg><span data-i18n="mu.shuffleAll">셔플 재생</span></button>
+      </div>
+      <div class="music__tabs" id="mTabs" role="tablist"></div>
+      <ol class="music__tracks" id="mTracks"></ol>
+    </section>
+  </div>
+</div>
+<audio id="audio" preload="none"></audio>
+
+<!-- ═════════ 편의 기능: 읽기 진행 · 목차 · 맨 위로 ═════════ -->
+<div class="progress" id="progress" aria-hidden="true"><i></i></div>
+<nav class="toc" id="toc" aria-label="목차" data-i18n-attr="aria-label:toc.label"></nav>
+<button class="totop" id="toTop" type="button" aria-label="맨 위로" title="맨 위로" data-i18n-attr="aria-label:ui.top;title:ui.top"><svg><use href="#i-left"/></svg></button>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -941,6 +941,12 @@
       const t = setTimeout(done, REDUCE ? Math.min(ms, 300) : ms);
       waker = done;
     });
+    /* 대사가 다 나오면 클릭 · 터치 · Space · Enter 를 누를 때까지 기다린다 (▼ 표시) */
+    const hold = () => new Promise(res => {
+      root.classList.add('is-waiting');
+      const done = () => { if (waker === done) waker = null; root.classList.remove('is-waiting'); res(); };
+      waker = done;
+    });
     function type(el, text, tk) {
       return new Promise(res => {
         let i = 0; el.textContent = '';
@@ -1162,7 +1168,7 @@
       if (staged) at('p-hurt');
       at('p2'); await pause(800); if (!alive()) return;
       at('p-line');
-      if (lines[0]) { await type($('#cutText'), lines[0], tk); if (!alive()) return; await pause(1300); if (!alive()) return; }
+      if (lines[0]) { await type($('#cutText'), lines[0], tk); if (!alive()) return; await hold(); if (!alive()) return; }
       if (staged) {
         /* 각성: 붉은 맥박이 걷히고 위에서 흰빛이 내려온다 */
         root.classList.remove('p-hurt'); at('p-awake'); power = .55;
@@ -1170,7 +1176,7 @@
         await swap(imgs[1]); if (!alive()) return;
         await pause(350); if (!alive()) return;
         await type($('#cutText'), lines[1], tk); if (!alive()) return;
-        await pause(1200); if (!alive()) return;
+        await hold(); if (!alive()) return;
       }
       at('p3'); power = 1; burst();
       if (staged) { setTimeout(() => { if (alive()) $('#cutImg').src = imgs[2]; }, 60); }
@@ -1179,13 +1185,19 @@
       await pause(500); if (!alive()) return;
       const last = staged ? lines[2] : lines[1];
       if (last) { await type($('#cutText'), last, tk); if (!alive()) return; }
-      await pause(1800); if (!alive()) return;
+      await hold(); if (!alive()) return;
       at('p-out'); await new Promise(r => setTimeout(r, 650));
       if (alive()) finish();
     }
+    /* 누르면: 대사가 나오는 중이면 한 번에 다 보여주고, 다 나왔으면 다음으로 */
+    const advance = () => { if (typing) typing(); else if (waker) waker(); };
     root.addEventListener('click', e => {
       if (e.target.closest('#cutSkip')) { finish(); return; }
-      if (typing) typing(); else if (waker) waker();
+      advance();
+    });
+    addEventListener('keydown', e => {
+      if (root.hidden || e.repeat) return;
+      if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); advance(); }
     });
     addEventListener('resize', () => { if (!root.hidden) resize(); });
     return {

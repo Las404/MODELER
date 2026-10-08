@@ -1763,3 +1763,8 @@ body.is-cut .dock { transform: translateY(110%); }
 @media (max-width: 860px) {
   .domain__extra p { font-size: .8rem; }
 }
+
+/* 컷씬 대사: 클릭해서 넘기기 표시 */
+.cut__next { position: absolute; right: 16px; bottom: 10px; font-style: normal; font-size: .8rem; color: var(--cc); opacity: 0; transition: opacity .2s; }
+.cut.is-waiting .cut__next { opacity: 1; animation: cutNext .9s ease-in-out infinite; }
+@keyframes cutNext { 50% { transform: translateY(4px); opacity: .45; } }

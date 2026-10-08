@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif+KR:wght@500;700;900&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <!-- 버전 번호(?v=)를 바꾸면 브라우저가 예전 파일 대신 새 파일을 받는다. 수정할 때마다 함께 올린다 -->
-<link rel="stylesheet" href="css/style.css?v=20261009-0645">
+<link rel="stylesheet" href="css/style.css?v=20261009-0654">
 <script>
 /* 언어 고르기: 주소의 ?lang= → 저장된 선택 → 브라우저 언어 순서. 한국어가 아니면 번역 파일을 먼저 읽는다 */
 (function () {
@@ -34,7 +34,7 @@
   if (L !== 'ko') {
     var f = { ja: 'Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700;900', zh: 'Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700;900' }[L];
     if (f) document.write('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=' + f + '&display=swap">');
-    document.write('<script src="js/lang/' + L + '.js?v=20261009-0645"><\/script>');
+    document.write('<script src="js/lang/' + L + '.js?v=20261009-0654"><\/script>');
   }
 })();
 </script>
@@ -736,7 +736,7 @@
   <div class="cut__hanja" id="cutHanja" aria-hidden="true"></div>
   <div class="cut__name"><small>RELEASE · 解放</small><b id="cutRel"></b></div>
   <div class="cut__bars" aria-hidden="true"><i></i><i></i></div>
-  <div class="cut__line" aria-live="polite"><span class="cut__who" id="cutWho"></span><p id="cutText"></p></div>
+  <div class="cut__line" aria-live="polite"><span class="cut__who" id="cutWho"></span><p id="cutText"></p><i class="cut__next" aria-hidden="true">▼</i></div>
   <div class="cut__flash" aria-hidden="true"></div>
   <button class="cut__skip" id="cutSkip" type="button">SKIP ›</button>
 </div>
@@ -846,7 +846,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/data.js?v=20261009-0645"></script>
-<script src="js/main.js?v=20261009-0645"></script>
+<script src="js/data.js?v=20261009-0654"></script>
+<script src="js/main.js?v=20261009-0654"></script>
 </body>
 </html>

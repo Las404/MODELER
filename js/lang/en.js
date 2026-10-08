@@ -236,6 +236,7 @@ window.MODELER_L10N = {
     'mu.rename': 'Rename', 'mu.delete': 'Delete', 'mu.renamePrompt': 'New playlist name', 'mu.delConfirm': 'Delete the playlist “{name}”?',
     'mu.listEmpty': 'No songs yet. In the “All” tab, tap ＋ next to a song to add it.', 'mu.removeFrom': 'Remove from this playlist',
     'mu.noLists': 'You have no playlists yet. Create one below.', 'mu.defaultName': 'My playlist {n}',
+    'rx.cost': 'Cost', 'rx.cond': 'Trigger', 'rx.unawakened': 'Unmanifested',
     'pal.ph': 'Search modeler · model · faction',
     'rg.reset': 'Reset layout',
     'rs.title': 'All Relations at a Glance',
@@ -582,7 +583,7 @@ window.MODELER_L10N = {
         ],
         bg: 'Rated "uncontrollable" in Pantheon testing, no one would take her — only the Karasu Office did. She lives blindfolded, so outside of combat she relies on her colleagues for almost everything.'
       },
-      asagiri: {
+      asagiri: { gradeNote: 'Near the Release threshold',
         name: 'Rei Asagiri', role: 'Deputy Director (de facto)', model: 'Excalibur',
         look: 'Tall, platinum-blonde low ponytail, bangs swept back, blue eyes, slash scar at the corner of the left eye, deep navy long coat over a black turtleneck, silver epaulettes, scabbard on the left hip, black leather gloves, knee-high riding boots',
         persona: ['Upright', 'Courteous', 'Inflexible', 'Holds herself to high standards', 'Can\'t accept praise'],
@@ -592,7 +593,8 @@ window.MODELER_L10N = {
           { n: 'Excalibur', d: 'Drawn, a white light extends from the blade. It cuts what is thought uncuttable (aether barriers, the immaterial parts of Morphos). Sheathed, it is an ordinary two-handed sword.' },
           { n: 'Whetstone and maintenance kit' }, { n: 'Emergency contact card for every staff member' }
         ],
-        bg: 'Rated A-grade by the Pantheon, she refused to join anyway. Excalibur is a flagship-class divine artifact and thus a candidate sacrifice for Ragnarök, so the Pantheon still hasn\'t given up on recruiting her. Her real reason for staying private, she has told no one.'
+        release: { name: 'Excalibur', desc: 'A fog-shrouded lake. Its surface hardens like a mirror to hold her up, and the sky hangs with the white light of thirty torches. Inside the domain, any slash she swings cuts anything — barriers, the immaterial, even space itself. Blocking stops being an option.', cost: 'The slash never stops until the end of its arc. Whatever stands behind the target is cut along with it, so she cannot use it while allies are inside the domain.', cond: 'Her aether compression has already reached the threshold, yet it does not manifest because she is not sure she is worthy. It first manifests at the moment she is driven to the brink of death and has no room left to doubt.', lines: ['……So this is as far as I go. In the end, this sword never chose me.', '……No. There is no more room for doubt. Whether I am worthy — I will prove it now.', 'Everyone, out of the domain. ……Release — \u201CExcalibur.\u201D Nothing can stop this slash.'] },
+        bg: 'Rated A-grade by the Pantheon, she refused to join anyway. Excalibur is a flagship-class divine artifact and thus a candidate sacrifice for Ragnarök, so the Pantheon still hasn\'t given up on recruiting her. Her real reason for staying private, she has told no one. She has spent her whole life tending the sword and raised it to the threshold through efficiency alone, yet she has never once declared that the sword is hers.'
       },
 
       ashiya: {

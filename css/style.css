@@ -1733,3 +1733,33 @@ body.is-cut .dock { transform: translateY(110%); }
   .music__tabs::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb), .45); border-radius: 8px; border: 0; }
   .music__tabs::-webkit-scrollbar-thumb:hover { background: rgba(var(--accent-rgb), .75); }
 }
+
+/* ════════════════════════════════════════════════════════════
+   미발현 해방 (아사기리 레이): 3단계 컷씬 · 대가 / 발동 조건
+   ════════════════════════════════════════════════════════════ */
+.cut__char img.is-swap { opacity: 0 !important; transition: opacity .28s ease-in !important; }
+/* 부상: 붉은 맥박 */
+.cut.p-hurt .cut__veil { animation: cutHurt 1.3s ease-in-out infinite; }
+@keyframes cutHurt {
+  0%, 100% { box-shadow: inset 0 0 120px 30px rgba(140, 0, 12, .55); }
+  50% { box-shadow: inset 0 0 200px 70px rgba(170, 0, 16, .8); }
+}
+.cut.p-hurt .cut__bg { filter: blur(18px) brightness(.16) saturate(.6); }
+/* 각성: 위에서 내려오는 흰빛 */
+.cut__veil::after { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s var(--ease); background: radial-gradient(ellipse 45% 70% at 50% -10%, rgba(255, 255, 255, .55), transparent 70%); }
+.cut.p-awake .cut__veil::after { opacity: 1; }
+.cut.p4 .cut__veil::after { opacity: .35; }
+.cut[data-fx="lake"].p4 .cut__bg { filter: blur(0) brightness(.7) saturate(1.05); }
+
+.cm__gnote { display: block; margin-top: 2px; font-style: normal; font-size: .7rem; color: var(--acc, var(--accent)); }
+.rx-badge { display: inline-block; margin-left: 6px; padding: .05rem .45rem; border-radius: 4px; border: 1px solid currentColor; font: 700 .62rem var(--f-body); letter-spacing: .08em; font-style: normal; vertical-align: 1px; }
+.cm__rx { margin: 10px 0 0; padding: 10px 14px; border-radius: 10px; background: rgba(255, 255, 255, .03); border: 1px solid var(--line); font-size: .86rem; color: var(--text-2); }
+.cm__rx b { display: block; margin-bottom: 2px; font: 600 .68rem var(--f-mono); letter-spacing: .18em; color: var(--acc, var(--accent)); }
+.domain__extra { margin: -0.6rem 0 1.4rem; display: grid; gap: 8px; }
+.domain__extra:empty { display: none; }
+.domain__extra p { margin: 0; font-size: .86rem; line-height: 1.7; color: rgba(240, 242, 250, .78); }
+.domain__extra b { margin-right: 8px; font: 600 .7rem var(--f-mono); letter-spacing: .16em; color: var(--dc, var(--accent)); }
+.domain__name[data-badge]:not([data-badge=""])::after { content: attr(data-badge); display: inline-block; margin-left: .6rem; padding: .1rem .55rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, .6); font: 700 .8rem var(--f-body); letter-spacing: .1em; vertical-align: middle; }
+@media (max-width: 860px) {
+  .domain__extra p { font-size: .8rem; }
+}

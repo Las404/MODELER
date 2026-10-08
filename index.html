@@ -11,7 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif+KR:wght@500;700;900&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="css/style.css">
+<!-- 버전 번호(?v=)를 바꾸면 브라우저가 예전 파일 대신 새 파일을 받는다. 수정할 때마다 함께 올린다 -->
+<link rel="stylesheet" href="css/style.css?v=20261009-0645">
 <script>
 /* 언어 고르기: 주소의 ?lang= → 저장된 선택 → 브라우저 언어 순서. 한국어가 아니면 번역 파일을 먼저 읽는다 */
 (function () {
@@ -33,7 +34,7 @@
   if (L !== 'ko') {
     var f = { ja: 'Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700;900', zh: 'Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700;900' }[L];
     if (f) document.write('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=' + f + '&display=swap">');
-    document.write('<script src="js/lang/' + L + '.js"><\/script>');
+    document.write('<script src="js/lang/' + L + '.js?v=20261009-0645"><\/script>');
   }
 })();
 </script>
@@ -292,7 +293,7 @@
     </div>
     <p class="callout reveal" data-i18n-html="rel.callout">해방은 승리 확정이 아니라 <em>판돈을 올리는 행위</em>다. 깨지면, 편 쪽이 더 불리해진다.</p>
 
-    <h3 class="sub-title reveal"><span class="sub-title__t" data-i18n="rel.gallery">기록된 해방</span> <span>8</span></h3>
+    <h3 class="sub-title reveal"><span class="sub-title__t" data-i18n="rel.gallery">기록된 해방</span> <span id="relCount">9</span></h3>
     <div class="releases" id="releaseGrid"></div>
   </section>
 
@@ -713,6 +714,7 @@
     <p class="eyebrow" id="dmOwner"></p>
     <h3 class="domain__name" id="dmName"></h3>
     <p class="domain__desc" id="dmDesc"></p>
+    <div class="domain__extra" id="dmExtra"></div>
     <div class="domain__meta">
       <span><span data-i18n="dm.time">영역 지속</span> <b id="dmTimer">05:00</b></span>
       <button type="button" class="btn-ghost" id="dmReplay" data-i18n="dm.replay">컷씬 다시 보기</button>
@@ -844,7 +846,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/data.js"></script>
-<script src="js/main.js"></script>
+<script src="js/data.js?v=20261009-0645"></script>
+<script src="js/main.js?v=20261009-0645"></script>
 </body>
 </html>

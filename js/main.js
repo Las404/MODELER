@@ -114,7 +114,8 @@
     'mu.added': '「{name}」에 {n}곡을 담았습니다.', 'mu.removed': '「{name}」에서 뺐습니다.', 'mu.created': '「{name}」 플레이리스트를 만들었습니다.',
     'mu.rename': '이름 변경', 'mu.delete': '삭제', 'mu.renamePrompt': '플레이리스트의 새 이름', 'mu.delConfirm': '「{name}」 플레이리스트를 삭제할까요?',
     'mu.listEmpty': '아직 담긴 곡이 없습니다. 「전체」 탭에서 곡 옆의 ＋ 를 눌러 담아 보세요.', 'mu.removeFrom': '이 플레이리스트에서 빼기',
-    'mu.noLists': '아직 만든 플레이리스트가 없습니다. 아래에서 새로 만들어 보세요.', 'mu.defaultName': '내 플레이리스트 {n}'
+    'mu.noLists': '아직 만든 플레이리스트가 없습니다. 아래에서 새로 만들어 보세요.', 'mu.defaultName': '내 플레이리스트 {n}',
+    'rx.cost': '대가', 'rx.cond': '발동 조건', 'rx.unawakened': '미발현'
   };
   const UI = Object.assign({}, KO, (LX && LX.ui) || {});
   const T = (key, vars) => {
@@ -131,7 +132,7 @@
     D.CHARACTERS.forEach(c => {
       const t = (LD.chars || {})[c.id];
       if (!t) return;
-      ['name', 'role', 'age', 'look', 'persona', 'speech', 'quote', 'bg'].forEach(k => { if (t[k] != null) c[k] = t[k]; });
+      ['name', 'role', 'age', 'look', 'persona', 'speech', 'quote', 'bg', 'gradeNote'].forEach(k => { if (t[k] != null) c[k] = t[k]; });
       if (t.model) c.model.local = t.model;
       if (t.items) c.items = c.items.map((it, i) => Object.assign({}, it, t.items[i] || {}));
       if (t.release && c.release) Object.assign(c.release, t.release);
@@ -510,7 +511,8 @@
   }
 
   function renderReleases() {
-    const order = ['amagi', 'tendo', 'hayase', 'konoe', 'ashiya', 'kuga', 'hiiragi', 'kuroiwa'];
+    const order = ['amagi', 'tendo', 'hayase', 'konoe', 'asagiri', 'ashiya', 'kuga', 'hiiragi', 'kuroiwa'];
+    const cnt = $('#relCount'); if (cnt) cnt.textContent = order.length;
     $('#releaseGrid').innerHTML = order.map((id, i) => {
       const c = byId[id], lock = isLocked(c);
       return `<button class="rcard reveal${lock ? ' is-locked' : ''}" type="button" data-release="${id}" style="--rc:${hexRgb(c.accent)};transition-delay:${(i % 4) * 70}ms">
@@ -835,7 +837,7 @@
           <h2 class="cm__name" id="cmName">${esc(c.name)}</h2>
           <div class="cm__model"><code>MODEL: ${esc(c.model.en)}</code><span>${esc(c.model.local)}</span><span>${catName(c.model.cat)}</span><span>${T('cm.myth', { myth: mythName(c.model.myth) })}</span>${c.model.forced ? `<span class="is-forced">${T('card.forced')}</span>` : ''}</div>
           <div class="cm__stats">
-            <div><small>${gi.kind === 'disaster' ? T('cm.gradeD') : T('cm.gradeH')}</small><b>${esc(gradeName(c.grade))}</b></div>
+            <div><small>${gi.kind === 'disaster' ? T('cm.gradeD') : T('cm.gradeH')}</small><b>${esc(gradeName(c.grade))}</b>${c.gradeNote ? `<em class="cm__gnote">${esc(c.gradeNote)}</em>` : ''}</div>
             <div><small>${T('cm.faction')}</small><b>${f.name}</b></div>
             <div><small>${T('cm.age')}</small><b>${esc(ageText(c.age))}</b></div>
             <div><small>${T('cm.sex')}</small><b>${esc(sexText(c.sex))}</b></div>
@@ -847,8 +849,10 @@
           <section class="cm__sec"><h4>${T('cm.secI')}</h4><div class="cm__items">${c.items.map(it => `<div class="cm__item${it.core ? ' is-core' : ''}"><b>${esc(it.n)}</b>${it.d ? `<p>${esc(it.d)}</p>` : ''}</div>`).join('')}</div></section>
           ${c.release ? `<section class="cm__sec"><h4>${T('cm.secR')}</h4>
             <button class="cm__release" type="button" data-release="${c.id}" style="background-image:url('assets/release/${c.id}.jpg')">
-              <span class="cm__release-in"><small>解放 · ${c.release.hanja}</small><b>「${esc(c.release.name)}」<span>${c.release.hanja}</span></b><p>${esc(c.release.desc)}</p><em>${T('cm.open')}</em></span>
+              <span class="cm__release-in"><small>解放 · ${c.release.hanja}${c.release.unawakened ? ` <i class="rx-badge">${T('rx.unawakened')}</i>` : ''}</small><b>「${esc(c.release.name)}」<span>${c.release.hanja}</span></b><p>${esc(c.release.desc)}</p><em>${T('cm.open')}</em></span>
             </button>
+            ${c.release.cost ? `<p class="cm__rx"><b>${T('rx.cost')}</b>${esc(c.release.cost)}</p>` : ''}
+            ${c.release.cond ? `<p class="cm__rx"><b>${T('rx.cond')}</b>${esc(c.release.cond)}</p>` : ''}
             ${Music.has('r-' + c.id) ? `<button class="cm__theme cm__theme--rel${Music.cur === 'r-' + c.id ? ' is-cur' : ''}" type="button" data-play="r-${c.id}"><svg><use href="#i-music"/></svg><span><small>${T('mu.playRelease')}</small><b>${esc(Music.titleOf('r-' + c.id))}</b></span><i class="eq" aria-hidden="true"><b></b><b></b><b></b></i></button>` : ''}</section>` : ''}
           <section class="cm__sec"><h4>${T('cm.secB')}</h4><p>${esc(c.bg)}</p></section>
           ${rels.length ? `<section class="cm__sec"><h4>${T('cm.secRel')}</h4><div class="cm__rels">${rels.map(relHTML).join('')}</div></section>` : ''}
@@ -921,7 +925,9 @@
     hiiragi: { fx: 'frost',  from: 'fade' },
     kuroiwa: { fx: 'fog',    from: 'dark' },
     hayase:  { fx: 'walls',  from: 'left' },
-    konoe:   { fx: 'runes',  from: 'top' }
+    konoe:   { fx: 'runes',  from: 'top' },
+    /* 미발현 해방: 부상 → 각성 → 해방, 그림 3장 */
+    asagiri: { fx: 'lake',   from: 'fade', imgs: ['asagiri-1', 'asagiri-2', 'asagiri-3'] }
   };
   const Cut = (() => {
     const root = $('#cut'), cv = $('#cutFx'), cx = cv.getContext('2d');
@@ -958,7 +964,7 @@
     const rnd = (a, b) => a + Math.random() * (b - a);
     function seed() {
       parts = []; slashes = []; rings = []; bolt = 0; eclipse = 0;
-      const n = { rays: 60, storm: 220, mirror: 46, chain: 40, frost: 140, fog: 70, walls: 90, runes: 34 }[kind] || 60;
+      const n = { rays: 60, storm: 220, mirror: 46, chain: 40, frost: 140, fog: 70, walls: 90, runes: 34, lake: 70 }[kind] || 60;
       for (let i = 0; i < n; i++) parts.push({ x: rnd(0, W), y: rnd(0, H), s: rnd(.4, 1.4), r: rnd(0, 6.28), v: rnd(.3, 1), k: Math.random() });
     }
     function burst() {
@@ -966,6 +972,8 @@
       if (kind === 'storm') { bolt = 1; for (let i = 0; i < 8; i++) slashes.push({ y: H * (.12 + i * .1) + rnd(-20, 20), d: Math.random() < .5 ? 1 : -1, p: -i * .08 }); }
       if (kind === 'chain') for (let i = 0; i < 26; i++) parts.push({ x: W / 2, y: H * .45, s: rnd(.8, 1.8), r: rnd(0, 6.28), v: rnd(4, 11), k: 2, a: rnd(0, 6.28) });
       if (kind === 'walls') for (let i = 0; i < 9; i++) slashes.push({ x: (i + .5) / 9 * W, w: W / 9 * rnd(.5, .85), h: rnd(.35, .7) * H, p: -i * .05 });
+      /* 엑스칼리버: 궤도 끝까지 멈추지 않는 단 한 줄의 참격 */
+      if (kind === 'lake') slashes.push({ p: 0, ang: -.16 });
     }
     function draw(t) {
       const dt = (t - t0) / 1000; t0 = t;
@@ -1075,6 +1083,31 @@
           cx.beginPath(); cx.ellipse(0, 0, 4 * p.s, 15 * p.s, 0, 0, 6.28); cx.fill(); cx.restore();
         });
       }
+      if (kind === 'lake') {
+        /* 호수 안개 (앞 절반) · 횃불 서른 자루분의 흰빛 (뒤 절반) */
+        parts.forEach((p, i) => {
+          if (i < 40) {
+            p.x += .25 * p.v; if (p.x > W + 200) p.x = -200;
+            const y = H * (.55 + p.k * .4), rw = 160 + p.s * 140, g = cx.createRadialGradient(p.x, y, 0, p.x, y, rw);
+            g.addColorStop(0, `rgba(210,225,240,${.06 + .05 * P})`); g.addColorStop(1, 'rgba(210,225,240,0)');
+            cx.save(); cx.scale(1, .35); cx.fillStyle = g; cx.beginPath(); cx.arc(p.x, y / .35, rw, 0, 6.28); cx.fill(); cx.restore();
+          } else {
+            const x = (i - 40 + .5) / 30 * W, y = H * (.1 + .22 * ((i * 37) % 10) / 10) + Math.sin(t / 900 + i) * 6;
+            const a = Math.max(.08, P) * (.6 + .4 * Math.sin(t / 400 + i * 1.7));
+            cx.fillStyle = `rgba(255,255,255,${a * .25})`; cx.beginPath(); cx.arc(x, y, 9, 0, 6.28); cx.fill();
+            cx.fillStyle = `rgba(255,255,255,${a})`; cx.beginPath(); cx.arc(x, y, 2.4, 0, 6.28); cx.fill();
+          }
+        });
+        slashes.forEach(s => {
+          s.p = Math.min(2.2, s.p + dt * 1.6);
+          const k = Math.min(1, s.p), fade = s.p > 1.4 ? Math.max(0, 1 - (s.p - 1.4) / .8) : 1, L = Math.hypot(W, H) * .7 * k;
+          cx.save(); cx.translate(W / 2, H * .5); cx.rotate(s.ang);
+          cx.shadowColor = '#fff'; cx.shadowBlur = 30;
+          cx.fillStyle = `rgba(255,255,255,${fade})`; cx.fillRect(-L, -2.5, L * 2, 5);
+          cx.fillStyle = `rgba(${c},${fade * .5})`; cx.fillRect(-L, -10, L * 2, 20);
+          cx.restore(); cx.shadowBlur = 0;
+        });
+      }
       rings.forEach(r => {
         r.r += dt * Math.max(W, H) * 1.1; r.a -= dt * 1.1;
         if (r.a > 0) { cx.strokeStyle = `rgba(${c},${r.a})`; cx.lineWidth = 6 * r.a; cx.beginPath(); cx.arc(W / 2, H / 2, r.r, 0, 6.28); cx.stroke(); }
@@ -1093,14 +1126,26 @@
       if (!Modal.isOpen && !Music.isOpen) body.classList.remove('is-locked');
     }
     function finish() { if (!finishCb) return; const cb = finishCb; finishCb = null; end(); cb(); }
+    /* 단계형 컷씬에서 캐릭터 그림 바꾸기 (잠깐 사라졌다가 새 그림으로) */
+    async function swap(src) {
+      const img = $('#cutImg');
+      img.classList.add('is-swap');
+      await new Promise(r => setTimeout(r, 300));
+      img.src = src;
+      img.classList.remove('is-swap');
+    }
     async function run(c) {
       const tk = ++token, conf = CUT_CONF[c.id] || { fx: 'rays', from: 'fade' };
       const lines = c.release.lines || [];
-      kind = conf.fx; col = hexRgb(c.accent); power = .25;
+      /* imgs 가 여러 장이고 대사가 3줄이면 부상 → 각성 → 해방 3단계로 진행 */
+      const imgs = (conf.imgs || [c.id]).map(n => `assets/cutin/${n}.webp`);
+      const staged = imgs.length > 2 && lines.length > 2;
+      imgs.slice(1).forEach(src => { new Image().src = src; });
+      kind = conf.fx; col = hexRgb(c.accent); power = staged ? .12 : .25;
       root.dataset.fx = conf.fx; root.dataset.from = conf.from;
       root.style.setProperty('--cc', c.accent);
       $('#cutBg').style.backgroundImage = `url('assets/release/${c.id}.jpg')`;
-      $('#cutImg').src = `assets/cutin/${c.id}.webp`;
+      $('#cutImg').src = imgs[0];
       $('#cutClones').innerHTML = conf.fx === 'mirror' ? `<img src="assets/cutin/${c.id}.webp" alt="">`.repeat(4) : '';
       $('#cutWho').textContent = c.name;
       $('#cutText').textContent = '';
@@ -1114,13 +1159,26 @@
       const alive = () => tk === token;
 
       at('p1'); await pause(450); if (!alive()) return;
+      if (staged) at('p-hurt');
       at('p2'); await pause(800); if (!alive()) return;
       at('p-line');
       if (lines[0]) { await type($('#cutText'), lines[0], tk); if (!alive()) return; await pause(1300); if (!alive()) return; }
-      at('p3'); power = 1; burst(); await pause(1150); if (!alive()) return;
+      if (staged) {
+        /* 각성: 붉은 맥박이 걷히고 위에서 흰빛이 내려온다 */
+        root.classList.remove('p-hurt'); at('p-awake'); power = .55;
+        $('#cutText').textContent = '';
+        await swap(imgs[1]); if (!alive()) return;
+        await pause(350); if (!alive()) return;
+        await type($('#cutText'), lines[1], tk); if (!alive()) return;
+        await pause(1200); if (!alive()) return;
+      }
+      at('p3'); power = 1; burst();
+      if (staged) { setTimeout(() => { if (alive()) $('#cutImg').src = imgs[2]; }, 60); }
+      await pause(1150); if (!alive()) return;
       at('p4'); $('#cutText').textContent = '';
       await pause(500); if (!alive()) return;
-      if (lines[1]) { await type($('#cutText'), lines[1], tk); if (!alive()) return; }
+      const last = staged ? lines[2] : lines[1];
+      if (last) { await type($('#cutText'), last, tk); if (!alive()) return; }
       await pause(1800); if (!alive()) return;
       at('p-out'); await new Promise(r => setTimeout(r, 650));
       if (alive()) finish();
@@ -1164,6 +1222,8 @@
       $('#dmOwner').textContent = lock ? T('dm.ownerLocked') : T('dm.owner', { name: c.name, model: c.model.local });
       $('#dmName').textContent = `「${c.release.name}」`;
       $('#dmDesc').textContent = c.release.desc;
+      $('#dmExtra').innerHTML = ['cost', 'cond'].filter(k => c.release[k]).map(k => `<p><b>${T('rx.' + k)}</b>${esc(c.release[k])}</p>`).join('');
+      $('#dmName').dataset.badge = c.release.unawakened ? T('rx.unawakened') : '';
       $('#dmChar').hidden = lock;
       $('#dmReplay').hidden = lock || !Cut.has(c);
       const mb = $('#dmMusic');

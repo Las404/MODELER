@@ -715,11 +715,28 @@
     <p class="domain__desc" id="dmDesc"></p>
     <div class="domain__meta">
       <span><span data-i18n="dm.time">영역 지속</span> <b id="dmTimer">05:00</b></span>
+      <button type="button" class="btn-ghost" id="dmReplay" data-i18n="dm.replay">컷씬 다시 보기</button>
       <button type="button" class="btn-ghost dm__music" id="dmMusic" data-play=""><svg><use href="#i-music"/></svg><span data-i18n="mu.playRelease">해방곡 재생</span></button>
       <button type="button" class="btn-ghost" id="dmChar" data-i18n="dm.char">보유자 기록</button>
       <button type="button" class="btn-ghost" data-close data-i18n="dm.close">영역 해제</button>
     </div>
   </div>
+</div>
+
+<!-- ═════════ 해방 컷씬 ═════════ -->
+<div class="cut" id="cut" role="dialog" aria-modal="true" aria-label="해방 컷씬" data-i18n-attr="aria-label:cut.aria" hidden>
+  <div class="cut__bg" id="cutBg"></div>
+  <canvas class="cut__fx" id="cutFx" aria-hidden="true"></canvas>
+  <div class="cut__clones" id="cutClones" aria-hidden="true"></div>
+  <div class="cut__char"><img id="cutImg" alt=""></div>
+  <div class="cut__veil" aria-hidden="true"></div>
+  <div class="cut__kanji" aria-hidden="true">解放</div>
+  <div class="cut__hanja" id="cutHanja" aria-hidden="true"></div>
+  <div class="cut__name"><small>RELEASE · 解放</small><b id="cutRel"></b></div>
+  <div class="cut__bars" aria-hidden="true"><i></i><i></i></div>
+  <div class="cut__line" aria-live="polite"><span class="cut__who" id="cutWho"></span><p id="cutText"></p></div>
+  <div class="cut__flash" aria-hidden="true"></div>
+  <button class="cut__skip" id="cutSkip" type="button">SKIP ›</button>
 </div>
 
 <!-- ═════════ 검색 팔레트 ═════════ -->
@@ -791,11 +808,31 @@
     <section class="music__list" aria-label="재생 목록" data-i18n-attr="aria-label:mu.queue">
       <div class="music__tools">
         <label class="search"><svg><use href="#i-search"/></svg><input id="mSearch" type="search" placeholder="곡 · 캐릭터 검색" aria-label="곡 검색" data-i18n-attr="placeholder:mu.ph;aria-label:mu.ph"></label>
+        <button class="btn-ghost music__sel" id="mSelBtn" type="button" data-i18n="mu.select">선택</button>
         <button class="btn-main music__shuffle-all" type="button" data-m="shuffleAll"><svg><use href="#i-shuffle"/></svg><span data-i18n="mu.shuffleAll">셔플 재생</span></button>
       </div>
       <div class="music__tabs" id="mTabs" role="tablist"></div>
+      <div class="music__lh" id="mListHead" hidden></div>
       <ol class="music__tracks" id="mTracks"></ol>
     </section>
+  </div>
+  <!-- 선택 모드 하단 바 -->
+  <div class="music__selbar" id="mSelBar" hidden>
+    <span id="mSelCount"></span>
+    <button class="btn-ghost" id="mSelCancel" type="button" data-i18n="mu.cancel">취소</button>
+    <button class="btn-main" id="mSelAdd" type="button" data-i18n="mu.addTo">플레이리스트에 담기</button>
+  </div>
+  <!-- 플레이리스트에 담기 -->
+  <div class="msheet" id="mSheet" hidden>
+    <div class="msheet__scrim" data-msheet-close></div>
+    <div class="msheet__box" role="dialog" aria-modal="true" aria-labelledby="mSheetTitle">
+      <header><h3 id="mSheetTitle" data-i18n="mu.addTo">플레이리스트에 담기</h3><button class="mbtn" type="button" data-msheet-close aria-label="닫기" data-i18n-attr="aria-label:cm.close"><svg><use href="#i-close"/></svg></button></header>
+      <ul class="msheet__list" id="mSheetList"></ul>
+      <form class="msheet__form" id="mSheetForm" autocomplete="off">
+        <input id="mSheetName" type="text" maxlength="30" aria-label="플레이리스트 이름" data-i18n-attr="aria-label:mu.newPh">
+        <button class="btn-main" type="submit" data-i18n="mu.create">새로 만들기</button>
+      </form>
+    </div>
   </div>
 </div>
 <audio id="audio" preload="none"></audio>

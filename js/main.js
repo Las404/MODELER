@@ -107,7 +107,14 @@
     'mu.rep.all': '전체 반복', 'mu.rep.one': '한 곡 반복', 'mu.rep.off': '반복 끔',
     'mu.shuffleOn': '셔플 켜짐', 'mu.shuffleOff': '셔플 꺼짐',
     'mu.play': '재생', 'mu.pause': '일시정지',
-    'mu.playTheme': '테마곡 재생', 'mu.playRelease': '해방곡 재생'
+    'mu.playTheme': '테마곡 재생', 'mu.playRelease': '해방곡 재생',
+    'dm.replay': '컷씬 다시 보기', 'cut.aria': '해방 컷씬',
+    'mu.select': '선택', 'mu.cancel': '취소', 'mu.addTo': '플레이리스트에 담기', 'mu.newPh': '플레이리스트 이름', 'mu.create': '새로 만들기',
+    'mu.newList': '새 플레이리스트', 'mu.selCount': '{n}곡 선택됨', 'mu.myLists': '내 플레이리스트',
+    'mu.added': '「{name}」에 {n}곡을 담았습니다.', 'mu.removed': '「{name}」에서 뺐습니다.', 'mu.created': '「{name}」 플레이리스트를 만들었습니다.',
+    'mu.rename': '이름 변경', 'mu.delete': '삭제', 'mu.renamePrompt': '플레이리스트의 새 이름', 'mu.delConfirm': '「{name}」 플레이리스트를 삭제할까요?',
+    'mu.listEmpty': '아직 담긴 곡이 없습니다. 「전체」 탭에서 곡 옆의 ＋ 를 눌러 담아 보세요.', 'mu.removeFrom': '이 플레이리스트에서 빼기',
+    'mu.noLists': '아직 만든 플레이리스트가 없습니다. 아래에서 새로 만들어 보세요.', 'mu.defaultName': '내 플레이리스트 {n}'
   };
   const UI = Object.assign({}, KO, (LX && LX.ui) || {});
   const T = (key, vars) => {
@@ -903,12 +910,249 @@
     return { open, close, step, get isOpen() { return !root.hidden; } };
   })();
 
+  /* ════════════════════ 해방 컷씬 ════════════════════
+     흐름: 레터박스 → 캐릭터 등장 → 대사 1 → 섬광 · 「解放」 → 영역이 펼쳐지며 해방명 → 대사 2 → 영역 화면
+     화면을 누르면 대사가 바로 다 나오거나 다음 단계로, SKIP / Esc 로 건너뛰기 */
+  const CUT_CONF = {
+    amagi:   { fx: 'rays',   from: 'bottom' },
+    tendo:   { fx: 'storm',  from: 'right' },
+    ashiya:  { fx: 'mirror', from: 'fade' },
+    kuga:    { fx: 'chain',  from: 'left' },
+    hiiragi: { fx: 'frost',  from: 'fade' },
+    kuroiwa: { fx: 'fog',    from: 'dark' },
+    hayase:  { fx: 'walls',  from: 'left' },
+    konoe:   { fx: 'runes',  from: 'top' }
+  };
+  const Cut = (() => {
+    const root = $('#cut'), cv = $('#cutFx'), cx = cv.getContext('2d');
+    let token = 0, raf = null, W = 0, H = 0, power = .25, kind = '', col = '255,255,255';
+    let parts = [], slashes = [], rings = [], bolt = 0, eclipse = 0, t0 = 0;
+    let waker = null, typing = null, finishCb = null;
+
+    /* ── 기다림 · 타자기 (누르면 앞당겨짐) ── */
+    const pause = ms => new Promise(res => {
+      const done = () => { clearTimeout(t); if (waker === done) waker = null; res(); };
+      const t = setTimeout(done, REDUCE ? Math.min(ms, 300) : ms);
+      waker = done;
+    });
+    function type(el, text, tk) {
+      return new Promise(res => {
+        let i = 0; el.textContent = '';
+        const fin = () => { clearInterval(iv); typing = null; el.textContent = text; res(); };
+        const iv = setInterval(() => {
+          if (tk !== token) { clearInterval(iv); typing = null; res(); return; }
+          el.textContent = text.slice(0, ++i);
+          if (i >= text.length) fin();
+        }, 36);
+        typing = fin;
+      });
+    }
+
+    /* ── 효과 캔버스 ── */
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = innerWidth; H = innerHeight;
+      cv.width = W * dpr; cv.height = H * dpr;
+      cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    function seed() {
+      parts = []; slashes = []; rings = []; bolt = 0; eclipse = 0;
+      const n = { rays: 60, storm: 220, mirror: 46, chain: 40, frost: 140, fog: 70, walls: 90, runes: 34 }[kind] || 60;
+      for (let i = 0; i < n; i++) parts.push({ x: rnd(0, W), y: rnd(0, H), s: rnd(.4, 1.4), r: rnd(0, 6.28), v: rnd(.3, 1), k: Math.random() });
+    }
+    function burst() {
+      rings.push({ r: 0, a: 1 });
+      if (kind === 'storm') { bolt = 1; for (let i = 0; i < 8; i++) slashes.push({ y: H * (.12 + i * .1) + rnd(-20, 20), d: Math.random() < .5 ? 1 : -1, p: -i * .08 }); }
+      if (kind === 'chain') for (let i = 0; i < 26; i++) parts.push({ x: W / 2, y: H * .45, s: rnd(.8, 1.8), r: rnd(0, 6.28), v: rnd(4, 11), k: 2, a: rnd(0, 6.28) });
+      if (kind === 'walls') for (let i = 0; i < 9; i++) slashes.push({ x: (i + .5) / 9 * W, w: W / 9 * rnd(.5, .85), h: rnd(.35, .7) * H, p: -i * .05 });
+    }
+    function draw(t) {
+      const dt = (t - t0) / 1000; t0 = t;
+      cx.clearRect(0, 0, W, H);
+      const P = power, c = col;
+      if (kind === 'rays') {
+        cx.save(); cx.translate(W / 2, -H * .08); cx.rotate(t / 9000);
+        for (let i = 0; i < 16; i++) {
+          cx.rotate(Math.PI * 2 / 16);
+          const g = cx.createLinearGradient(0, 0, 0, H * 1.4);
+          g.addColorStop(0, `rgba(${c},${.32 * P})`); g.addColorStop(1, `rgba(${c},0)`);
+          cx.fillStyle = g; cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(-W * .05, H * 1.4); cx.lineTo(W * .05, H * 1.4); cx.fill();
+        }
+        cx.restore();
+        parts.forEach(p => { p.y -= p.v * (.4 + P); if (p.y < -10) { p.y = H + 10; p.x = rnd(0, W); } cx.fillStyle = `rgba(${c},${.8 * p.k})`; cx.beginPath(); cx.arc(p.x, p.y, p.s * 1.6, 0, 6.28); cx.fill(); });
+      } else if (kind === 'storm') {
+        cx.strokeStyle = `rgba(190,205,255,${.25 + .25 * P})`; cx.lineWidth = 1;
+        cx.beginPath();
+        parts.forEach(p => { p.y += 18 * p.v + 6; p.x -= 6 * p.v; if (p.y > H) { p.y = -20; p.x = rnd(0, W * 1.2); } cx.moveTo(p.x, p.y); cx.lineTo(p.x + 7, p.y - 22); });
+        cx.stroke();
+        if (Math.random() < .004 + .02 * P) bolt = 1;
+        if (bolt > 0) {
+          cx.fillStyle = `rgba(220,230,255,${bolt * .35})`; cx.fillRect(0, 0, W, H);
+          cx.strokeStyle = `rgba(255,255,255,${bolt})`; cx.lineWidth = 2.5; cx.beginPath();
+          let x = rnd(W * .2, W * .8), y = 0; cx.moveTo(x, y);
+          while (y < H * .7) { x += rnd(-40, 40); y += rnd(20, 60); cx.lineTo(x, y); }
+          cx.stroke(); bolt = Math.max(0, bolt - dt * 4);
+        }
+        slashes.forEach(s => {
+          s.p = Math.min(1.4, s.p + dt * 2.2); if (s.p <= 0) return;
+          const k = Math.min(1, s.p), fade = s.p > 1 ? 1 - (s.p - 1) / .4 : 1;
+          cx.strokeStyle = `rgba(${c},${fade})`; cx.lineWidth = 3; cx.shadowColor = `rgb(${c})`; cx.shadowBlur = 18;
+          cx.beginPath(); const x0 = s.d > 0 ? -50 : W + 50; cx.moveTo(x0, s.y + 60); cx.lineTo(x0 + s.d * (W + 100) * k, s.y + 60 - 120 * k); cx.stroke(); cx.shadowBlur = 0;
+        });
+      } else if (kind === 'mirror') {
+        parts.forEach(p => {
+          p.r += .004 + .01 * P; p.y -= .2 * p.v; if (p.y < -40) { p.y = H + 40; p.x = rnd(0, W); }
+          const s = 14 + p.s * 26;
+          cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r);
+          const g = cx.createLinearGradient(-s, -s, s, s); g.addColorStop(0, `rgba(160,255,200,${.35 * (.4 + P)})`); g.addColorStop(1, `rgba(20,120,70,${.15 * (.4 + P)})`);
+          cx.fillStyle = g; cx.strokeStyle = `rgba(190,255,220,${.5 * (.4 + P)})`;
+          cx.beginPath(); cx.moveTo(0, -s); cx.lineTo(s * .6, 0); cx.lineTo(0, s * .8); cx.lineTo(-s * .5, s * .1); cx.closePath(); cx.fill(); cx.stroke();
+          cx.restore();
+        });
+      } else if (kind === 'chain') {
+        eclipse = Math.min(1, eclipse + dt * .25 * (P > .5 ? 3 : 1));
+        const mx = W * .74, my = H * .24, mr = Math.min(W, H) * .11;
+        cx.fillStyle = `rgba(${c},.9)`; cx.shadowColor = `rgb(${c})`; cx.shadowBlur = 40; cx.beginPath(); cx.arc(mx, my, mr, 0, 6.28); cx.fill(); cx.shadowBlur = 0;
+        cx.fillStyle = '#050304'; cx.beginPath(); cx.arc(mx + mr * 2.1 * (1 - eclipse), my - mr * .1 * (1 - eclipse), mr * 1.02, 0, 6.28); cx.fill();
+        parts.forEach(p => {
+          if (p.k === 2) {
+            p.x += Math.cos(p.a) * p.v; p.y += Math.sin(p.a) * p.v + 1; p.v *= .985; p.r += .08;
+            cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.strokeStyle = 'rgba(200,200,210,.9)'; cx.lineWidth = 3;
+            cx.beginPath(); cx.ellipse(0, 0, 9 * p.s, 5 * p.s, 0, 0, 6.28); cx.stroke(); cx.restore();
+          } else {
+            p.y -= .3 * p.v; p.x += Math.sin(t / 900 + p.r) * .3; if (p.y < 0) p.y = H;
+            cx.fillStyle = `rgba(180,170,160,${.35 * p.k})`; cx.fillRect(p.x, p.y, 2, 2);
+          }
+        });
+      } else if (kind === 'frost') {
+        parts.forEach(p => {
+          p.y += .5 + p.v * (.6 + P); p.x += Math.sin(t / 1200 + p.r) * .5; if (p.y > H + 10) { p.y = -10; p.x = rnd(0, W); }
+          cx.fillStyle = `rgba(230,240,255,${.5 + .4 * p.k})`; cx.beginPath(); cx.arc(p.x, p.y, p.s * 2.2, 0, 6.28); cx.fill();
+        });
+      } else if (kind === 'fog') {
+        parts.forEach((p, i) => {
+          if (i % 3) {
+            p.y -= .25 * p.v; p.x += Math.sin(t / 3000 + p.r) * .25; if (p.y < -120) { p.y = H + 120; p.x = rnd(0, W); }
+            const r = 60 + p.s * 90, g = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+            g.addColorStop(0, `rgba(225,215,240,${.07 + .06 * P})`); g.addColorStop(1, 'rgba(225,215,240,0)');
+            cx.fillStyle = g; cx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+          } else {
+            p.y -= .5 * p.v; if (p.y < -10) { p.y = H + 10; p.x = rnd(0, W); }
+            cx.fillStyle = `rgba(200,20,45,${.65 + .3 * P})`; cx.beginPath(); cx.ellipse(p.x, p.y, 3.2 * p.s, 4.2 * p.s, p.r, 0, 6.28); cx.fill();
+            cx.fillStyle = 'rgba(255,190,200,.7)'; cx.beginPath(); cx.arc(p.x - p.s, p.y - p.s * 1.4, p.s * .9, 0, 6.28); cx.fill();
+          }
+        });
+      } else if (kind === 'walls') {
+        cx.strokeStyle = `rgba(${c},${.18 + .3 * P})`; cx.lineWidth = 1.5; cx.beginPath();
+        parts.forEach(p => {
+          p.v += .012 * (1 + 3 * P); if (p.v > 1) { p.v = 0; p.r = rnd(0, 6.28); }
+          const R = Math.hypot(W, H) * .6, r1 = R * (1 - p.v), r2 = r1 * .82;
+          cx.moveTo(W / 2 + Math.cos(p.r) * r1, H / 2 + Math.sin(p.r) * r1); cx.lineTo(W / 2 + Math.cos(p.r) * r2, H / 2 + Math.sin(p.r) * r2);
+        });
+        cx.stroke();
+        slashes.forEach(s => {
+          s.p = Math.min(1, s.p + dt * 1.4); if (s.p <= 0) return;
+          const h = s.h * (1 - Math.pow(1 - s.p, 3));
+          cx.fillStyle = 'rgba(30,22,16,.92)'; cx.fillRect(s.x - s.w / 2, H - h, s.w, h);
+          cx.fillStyle = `rgba(${c},.55)`; cx.fillRect(s.x - s.w / 2, H - h, s.w, 3);
+          for (let k = 0; k < 4; k++) cx.fillRect(s.x - s.w / 2 + k * s.w / 4, H - h - 8, s.w / 8, 8);
+        });
+      } else if (kind === 'runes') {
+        const R = Math.min(W, H) * .36, gl = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ';
+        cx.save(); cx.translate(W / 2, H * .5);
+        [1, .78, .56].forEach((k, j) => {
+          cx.rotate((j % 2 ? -1 : 1) * t / (7000 - j * 1200));
+          cx.strokeStyle = `rgba(${c},${.35 + .4 * P})`; cx.lineWidth = j ? 1 : 2; cx.beginPath(); cx.arc(0, 0, R * k, 0, 6.28); cx.stroke();
+          cx.fillStyle = `rgba(${c},${.5 + .45 * P})`; cx.font = `${Math.round(R * .09)}px serif`; cx.textAlign = 'center';
+          const n = 24 - j * 6;
+          for (let i = 0; i < n; i++) { cx.save(); cx.rotate(i / n * 6.28); cx.fillText(gl[(i + j * 5) % gl.length], 0, -R * k + R * .07); cx.restore(); }
+        });
+        cx.restore();
+        parts.forEach(p => {
+          p.y += .6 + p.v; p.r += .01; p.x += Math.sin(t / 1500 + p.k * 6) * .6; if (p.y > H + 30) { p.y = -30; p.x = rnd(0, W); }
+          cx.save(); cx.translate(p.x, p.y); cx.rotate(Math.sin(p.r) * .8); cx.fillStyle = 'rgba(8,8,12,.85)';
+          cx.beginPath(); cx.ellipse(0, 0, 4 * p.s, 15 * p.s, 0, 0, 6.28); cx.fill(); cx.restore();
+        });
+      }
+      rings.forEach(r => {
+        r.r += dt * Math.max(W, H) * 1.1; r.a -= dt * 1.1;
+        if (r.a > 0) { cx.strokeStyle = `rgba(${c},${r.a})`; cx.lineWidth = 6 * r.a; cx.beginPath(); cx.arc(W / 2, H / 2, r.r, 0, 6.28); cx.stroke(); }
+      });
+      raf = requestAnimationFrame(draw);
+    }
+
+    /* ── 진행 ── */
+    function end() {
+      token++;
+      cancelAnimationFrame(raf); raf = null;
+      if (typing) typing = null;
+      waker = null;
+      root.hidden = true; root.className = 'cut';
+      body.classList.remove('is-cut');
+      if (!Modal.isOpen && !Music.isOpen) body.classList.remove('is-locked');
+    }
+    function finish() { if (!finishCb) return; const cb = finishCb; finishCb = null; end(); cb(); }
+    async function run(c) {
+      const tk = ++token, conf = CUT_CONF[c.id] || { fx: 'rays', from: 'fade' };
+      const lines = c.release.lines || [];
+      kind = conf.fx; col = hexRgb(c.accent); power = .25;
+      root.dataset.fx = conf.fx; root.dataset.from = conf.from;
+      root.style.setProperty('--cc', c.accent);
+      $('#cutBg').style.backgroundImage = `url('assets/release/${c.id}.jpg')`;
+      $('#cutImg').src = `assets/cutin/${c.id}.webp`;
+      $('#cutClones').innerHTML = conf.fx === 'mirror' ? `<img src="assets/cutin/${c.id}.webp" alt="">`.repeat(4) : '';
+      $('#cutWho').textContent = c.name;
+      $('#cutText').textContent = '';
+      $('#cutHanja').textContent = c.release.hanja;
+      $('#cutRel').textContent = `「${c.release.name}」`;
+      root.className = 'cut'; root.hidden = false; void root.offsetWidth;
+      body.classList.add('is-locked', 'is-cut');
+      resize(); seed(); t0 = performance.now();
+      cancelAnimationFrame(raf); raf = requestAnimationFrame(draw);
+      const at = cls => { if (tk === token) root.classList.add(cls); };
+      const alive = () => tk === token;
+
+      at('p1'); await pause(450); if (!alive()) return;
+      at('p2'); await pause(800); if (!alive()) return;
+      at('p-line');
+      if (lines[0]) { await type($('#cutText'), lines[0], tk); if (!alive()) return; await pause(1300); if (!alive()) return; }
+      at('p3'); power = 1; burst(); await pause(1150); if (!alive()) return;
+      at('p4'); $('#cutText').textContent = '';
+      await pause(500); if (!alive()) return;
+      if (lines[1]) { await type($('#cutText'), lines[1], tk); if (!alive()) return; }
+      await pause(1800); if (!alive()) return;
+      at('p-out'); await new Promise(r => setTimeout(r, 650));
+      if (alive()) finish();
+    }
+    root.addEventListener('click', e => {
+      if (e.target.closest('#cutSkip')) { finish(); return; }
+      if (typing) typing(); else if (waker) waker();
+    });
+    addEventListener('resize', () => { if (!root.hidden) resize(); });
+    return {
+      play(c) { return new Promise(res => { finishCb = res; run(c); }); },
+      skip: finish,
+      has: c => !!(c && c.release && CUT_CONF[c.id]),
+      get isOpen() { return !root.hidden; }
+    };
+  })();
+
   /* ════════════════════ 해방 영역 ════════════════════ */
   const Domain = (() => {
     const root = $('#domain');
     let timer = null, cur = null, closing = null;
-    function open(c, e) {
+    /* 해방 카드를 누르면: 컷씬(봉인되지 않은 캐릭터만) → 영역 화면 */
+    function open(c, e, opts = {}) {
       if (!c || !c.release) return;
+      if (!opts.noCut && Cut.has(c) && !isLocked(c)) {
+        const x = e && e.clientX, y = e && e.clientY;
+        Cut.play(c).then(() => show(c, x ? { clientX: x, clientY: y } : null));
+        return;
+      }
+      show(c, e);
+    }
+    function show(c, e) {
       clearTimeout(closing);
       cur = c;
       const lock = isLocked(c);
@@ -921,6 +1165,7 @@
       $('#dmName').textContent = `「${c.release.name}」`;
       $('#dmDesc').textContent = c.release.desc;
       $('#dmChar').hidden = lock;
+      $('#dmReplay').hidden = lock || !Cut.has(c);
       const mb = $('#dmMusic');
       mb.hidden = !Music.has('r-' + c.id);
       mb.dataset.play = 'r-' + c.id;
@@ -942,6 +1187,7 @@
     }
     root.addEventListener('click', e => { if (e.target.closest('[data-close]')) close(); });
     $('#dmChar').addEventListener('click', () => { const c = cur; close(); setTimeout(() => Modal.open(c.id), 300); });
+    $('#dmReplay').addEventListener('click', () => { const c = cur; clearInterval(timer); root.classList.remove('is-open'); root.hidden = true; Cut.play(c).then(() => show(c, null)); });
     return { open, close, get isOpen() { return !root.hidden && root.classList.contains('is-open'); } };
   })();
 
@@ -1579,7 +1825,7 @@
 
   /* ════════════════════ 음악 플레이어 ════════════════════
      하나의 <audio> 를 사이트 전체가 공유 → 페이지를 옮겨도, 화면이 꺼져도 계속 재생.
-     처음에는 멈춘 상태. 셔플 · 반복 · 볼륨 · 마지막 곡은 브라우저에 기억 */
+     처음에는 멈춘 상태. 셔플 · 반복 · 볼륨 · 마지막 곡 · 내 플레이리스트는 브라우저에 기억 */
   const Music = (() => {
     const MU = D.MUSIC, audio = $('#audio'), root = $('#music');
     const tracks = MU.tracks.map(t => Object.assign({}, t, { playable: t.audio !== false }));
@@ -1590,6 +1836,13 @@
     let shuffle = store.get('m.shuffle', true), repeat = store.get('m.repeat', 'all');
     let vol = store.get('m.vol', .7), muted = store.get('m.muted', false);
     let base = [], order = [], filter = 'all', q = '', loadedId = null, seeking = false;
+    let advancing = false, resumeWhenVisible = false;
+
+    /* 내 플레이리스트: [{ id, name, ids: [곡 id…] }] */
+    let lists = store.get('m.lists', []).filter(l => l && l.id && Array.isArray(l.ids));
+    const saveLists = () => store.set('m.lists', lists);
+    const listOf = id => lists.find(l => l.id === id);
+    let selecting = false, picked = new Set(), sheetIds = [];
 
     const groupName = g => FACTION_G.includes(g) ? D.FACTIONS[g].name : T('mu.g.' + g);
     const isTheme = t => t.char && t.g !== 'release';
@@ -1624,7 +1877,10 @@
       let i = order.indexOf(cur);
       if (i < 0) i = 0;
       let n = i + d;
-      if (n >= order.length) { if (auto && repeat === 'off') { audio.pause(); audio.currentTime = 0; return; } if (shuffle) { buildOrder(); n = order[0] === cur && order.length > 1 ? 1 : 0; } else n = 0; }
+      if (n >= order.length) {
+        if (auto && repeat === 'off') { audio.pause(); audio.currentTime = 0; return; }
+        if (shuffle) { buildOrder(); n = order[0] === cur && order.length > 1 ? 1 : 0; } else n = 0;
+      }
       if (n < 0) n = order.length - 1;
       play(order[n]);
     }
@@ -1634,17 +1890,30 @@
       const t = byTid[id];
       if (!t || !t.playable) return false;
       cur = id; store.set('m.track', id);
-      if (loadedId !== id) { audio.src = `assets/audio/${id}.mp3`; loadedId = id; }
+      if (loadedId !== id) {
+        audio.preload = 'auto';
+        audio.src = `assets/audio/${id}.mp3`;
+        audio.load();
+        loadedId = id;
+      }
+      advancing = false;
       paint();
       return true;
     }
     function play(id) {
       if (id && !load(id)) { toast(T('mu.soon')); return; }
       if (!loadedId) load(cur);
+      audio.loop = repeat === 'one';
       const p = audio.play();
-      if (p && p.catch) p.catch(() => {});
+      if (p && p.catch) p.catch(() => {
+        /* 화면이 꺼진 상태에서 브라우저가 재생을 막으면, 화면이 다시 켜질 때 이어서 재생 */
+        if (document.hidden) resumeWhenVisible = true;
+      });
     }
     function toggle() { if (audio.paused) play(); else audio.pause(); }
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && resumeWhenVisible) { resumeWhenVisible = false; play(); }
+    });
 
     /* ── 화면 ── */
     function paint() {
@@ -1674,6 +1943,7 @@
       });
       $$('[data-m="mute"]').forEach(b => { $('use', b).setAttribute('href', muted || vol === 0 ? '#i-mute' : '#i-vol'); });
       $$('[data-m-vol]').forEach(r => { r.value = Math.round((muted ? 0 : vol) * 100); r.style.setProperty('--p', r.value + '%'); });
+      if ('mediaSession' in navigator) { try { navigator.mediaSession.playbackState = on ? 'playing' : 'paused'; } catch (e) {} }
     }
     function paintTime() {
       const d = audio.duration || byTid[cur].dur || 0, c = audio.currentTime || 0;
@@ -1704,32 +1974,92 @@
 
     /* ── 목록 ── */
     function filtered() {
-      let l = filter === 'all' ? tracks : tracks.filter(t => t.g === filter);
+      let l;
+      if (filter.startsWith('u:')) { const pl = listOf(filter.slice(2)); l = pl ? pl.ids.map(id => byTid[id]).filter(Boolean) : []; }
+      else l = filter === 'all' ? tracks : tracks.filter(t => t.g === filter);
       if (q) l = l.filter(t => hay(t).includes(q));
       return l;
     }
     function renderTabs() {
+      if (filter.startsWith('u:') && !listOf(filter.slice(2))) filter = 'all';
       const gs = ['all', ...MU.groups];
       $('#mTabs').innerHTML = gs.map(g => {
         const n = g === 'all' ? tracks.length : tracks.filter(t => t.g === g).length;
         return `<button type="button" role="tab" aria-selected="${filter === g}" class="${filter === g ? 'is-on' : ''}" data-mg="${g}">${g === 'all' ? T('mu.g.all') : groupName(g)}<small>${n}</small></button>`;
-      }).join('');
+      }).join('')
+        + `<span class="music__tabs-sep" aria-hidden="true"></span>`
+        + lists.map(l => `<button type="button" role="tab" aria-selected="${filter === 'u:' + l.id}" class="is-user${filter === 'u:' + l.id ? ' is-on' : ''}" data-mg="u:${l.id}">★ ${esc(l.name)}<small>${l.ids.length}</small></button>`).join('')
+        + `<button type="button" class="is-new" data-mnew>＋ ${T('mu.newList')}</button>`;
+    }
+    function renderListHead() {
+      const box = $('#mListHead');
+      if (!filter.startsWith('u:')) { box.hidden = true; box.innerHTML = ''; return; }
+      const pl = listOf(filter.slice(2));
+      box.hidden = false;
+      box.innerHTML = `<div><p class="eyebrow">${T('mu.myLists')}</p><h3>${esc(pl.name)}</h3><small>${T('mu.count', { n: pl.ids.length })}</small></div>
+        <div class="music__lh-btns">
+          <button type="button" class="btn-ghost" data-mlist="rename">${T('mu.rename')}</button>
+          <button type="button" class="btn-ghost is-danger" data-mlist="delete">${T('mu.delete')}</button>
+        </div>`;
     }
     function renderList() {
-      const l = filtered();
+      const l = filtered(), user = filter.startsWith('u:');
+      const inAny = new Set(lists.flatMap(x => x.ids));
       let html = '', lastG = null, n = 0;
       l.forEach(t => {
         if (filter === 'all' && !q && t.g !== lastG) { html += `<li class="mt__head">${groupName(t.g)}</li>`; lastG = t.g; }
         n++;
-        html += `<li class="mt${t.id === cur ? ' is-cur' : ''}${t.playable ? '' : ' is-off'}" data-tid="${t.id}" tabindex="0" role="button" aria-label="${esc(titleOf(t))}">
+        const side = selecting
+          ? `<span class="mt__check${picked.has(t.id) ? ' is-on' : ''}" aria-hidden="true"></span>`
+          : user
+            ? `<button type="button" class="mt__btn" data-mdel="${t.id}" aria-label="${T('mu.removeFrom')}" title="${T('mu.removeFrom')}">−</button>`
+            : `<button type="button" class="mt__btn${inAny.has(t.id) ? ' is-in' : ''}" data-madd="${t.id}" aria-label="${T('mu.addTo')}" title="${T('mu.addTo')}">${inAny.has(t.id) ? '✓' : '＋'}</button>`;
+        html += `<li class="mt${t.id === cur ? ' is-cur' : ''}${t.playable ? '' : ' is-off'}${selecting && picked.has(t.id) ? ' is-picked' : ''}" data-tid="${t.id}" tabindex="0" role="button" aria-label="${esc(titleOf(t))}">
           <span class="mt__no">${String(n).padStart(2, '0')}</span>
           <span class="mt__art"><img src="${coverOf(t)}" alt="" loading="lazy"><i class="eq" aria-hidden="true"><b></b><b></b><b></b></i></span>
           <span class="mt__text"><b>${esc(titleOf(t))}</b><small>${esc(subOf(t))}</small></span>
           <span class="mt__dur">${t.playable ? fmt(t.dur) : T('mu.soon')}</span>
+          ${side}
         </li>`;
       });
-      $('#mTracks').innerHTML = html || `<li class="empty">${T('mu.empty')}</li>`;
+      $('#mTracks').innerHTML = html || `<li class="empty">${user && !q ? T('mu.listEmpty') : T('mu.empty')}</li>`;
       $('#mCount').textContent = T('mu.count', { n: tracks.filter(t => t.playable).length });
+      renderListHead();
+      paintSelect();
+    }
+
+    /* ── 선택 모드 · 담기 ── */
+    function paintSelect() {
+      root.classList.toggle('is-selecting', selecting);
+      $('#mSelBtn').classList.toggle('is-on', selecting);
+      $('#mSelBar').hidden = !selecting;
+      $('#mSelCount').textContent = T('mu.selCount', { n: picked.size });
+      $('#mSelAdd').disabled = !picked.size;
+    }
+    function setSelecting(on) { selecting = on; picked.clear(); renderList(); }
+    function openSheet(ids) {
+      sheetIds = ids;
+      const sh = $('#mSheet');
+      $('#mSheetList').innerHTML = lists.length
+        ? lists.map(l => { const all = ids.every(id => l.ids.includes(id)); return `<li><button type="button" data-msheet="${l.id}" class="${all ? 'is-in' : ''}"><b>★ ${esc(l.name)}</b><small>${T('mu.count', { n: l.ids.length })}</small><i>${all ? '✓' : '＋'}</i></button></li>`; }).join('')
+        : `<li class="empty">${T('mu.noLists')}</li>`;
+      $('#mSheetName').value = '';
+      $('#mSheetName').placeholder = T('mu.defaultName', { n: lists.length + 1 });
+      sh.hidden = false; void sh.offsetWidth; sh.classList.add('is-open');
+    }
+    function closeSheet() { const sh = $('#mSheet'); sh.classList.remove('is-open'); setTimeout(() => { sh.hidden = true; }, 250); }
+    function addTo(listId, ids) {
+      const l = listOf(listId); if (!l) return;
+      const before = l.ids.length;
+      ids.forEach(id => { if (!l.ids.includes(id)) l.ids.push(id); });
+      saveLists();
+      toast(T('mu.added', { name: l.name, n: l.ids.length - before }));
+    }
+    function createList(name, ids) {
+      const l = { id: 'p' + Date.now().toString(36), name: name || T('mu.defaultName', { n: lists.length + 1 }), ids: ids.filter(id => byTid[id]) };
+      lists.push(l); saveLists();
+      toast(T('mu.created', { name: l.name }));
+      return l;
     }
 
     /* ── 열기 · 닫기 ── */
@@ -1741,7 +2071,7 @@
       root.classList.add('is-open');
       body.classList.add('is-locked', 'is-music');
       /* 지금 곡이 보이도록 목록만 스크롤 (scrollIntoView 는 겹쳐진 창 전체를 밀어버림).
-         모바일은 한 화면으로 이어져 있으니 커버가 먼저 보이게 맨 위에서 시작 */
+         모바일은 창 전체가 하나로 스크롤되므로 커버가 먼저 보이게 맨 위에서 시작 */
       root.scrollTop = 0;
       const list = $('#mTracks'), main = $('.music__main', root), c = $('.mt.is-cur', root);
       main.scrollTop = 0;
@@ -1752,6 +2082,8 @@
     }
     function close() {
       if (root.hidden) return;
+      if (selecting) setSelecting(false);
+      if (!$('#mSheet').hidden) closeSheet();
       root.classList.remove('is-open');
       body.classList.remove('is-music');
       if (!Modal.isOpen && !Domain.isOpen) body.classList.remove('is-locked');
@@ -1767,7 +2099,7 @@
         else if (a === 'next') step(1);
         else if (a === 'prev') { if (audio.currentTime > 3) audio.currentTime = 0; else step(-1); }
         else if (a === 'shuffle') { shuffle = !shuffle; store.set('m.shuffle', shuffle); buildOrder(); paintState(); toast(shuffle ? T('mu.shuffleOn') : T('mu.shuffleOff')); }
-        else if (a === 'repeat') { repeat = { all: 'one', one: 'off', off: 'all' }[repeat]; store.set('m.repeat', repeat); paintState(); toast(T('mu.rep.' + repeat)); }
+        else if (a === 'repeat') { repeat = { all: 'one', one: 'off', off: 'all' }[repeat]; store.set('m.repeat', repeat); audio.loop = repeat === 'one'; paintState(); toast(T('mu.rep.' + repeat)); }
         else if (a === 'mute') {
           if (vol === 0) { vol = .5; muted = false; } else muted = !muted;
           audio.muted = muted; audio.volume = vol;
@@ -1793,15 +2125,66 @@
         else { if (!base.includes(id)) setBase(tracks); play(id); }
       }
     }, true);
+
     $('#mTracks').addEventListener('click', e => {
+      const add = e.target.closest('[data-madd]');
+      if (add) { e.stopPropagation(); openSheet([add.dataset.madd]); return; }
+      const del = e.target.closest('[data-mdel]');
+      if (del) {
+        e.stopPropagation();
+        const l = listOf(filter.slice(2));
+        if (l) { l.ids = l.ids.filter(id => id !== del.dataset.mdel); saveLists(); toast(T('mu.removed', { name: l.name })); renderTabs(); renderList(); }
+        return;
+      }
       const li = e.target.closest('.mt'); if (!li) return;
       const t = byTid[li.dataset.tid];
+      if (selecting) {
+        if (!t.playable) return;
+        picked.has(t.id) ? picked.delete(t.id) : picked.add(t.id);
+        li.classList.toggle('is-picked', picked.has(t.id));
+        const ck = $('.mt__check', li); if (ck) ck.classList.toggle('is-on', picked.has(t.id));
+        paintSelect();
+        return;
+      }
       if (!t.playable) { toast(T('mu.soon')); return; }
       if (t.id === cur && loadedId) { toggle(); return; }
       cur = t.id; setBase(filtered()); play(t.id);
     });
     $('#mTracks').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('mt')) e.target.click(); });
-    $('#mTabs').addEventListener('click', e => { const b = e.target.closest('[data-mg]'); if (!b) return; filter = b.dataset.mg; renderTabs(); renderList(); $('#mTracks').scrollTop = 0; });
+    $('#mTabs').addEventListener('click', e => {
+      if (e.target.closest('[data-mnew]')) { openSheet(selecting ? [...picked] : []); return; }
+      const b = e.target.closest('[data-mg]'); if (!b) return;
+      filter = b.dataset.mg; renderTabs(); renderList(); $('#mTracks').scrollTop = 0;
+    });
+    $('#mListHead').addEventListener('click', e => {
+      const b = e.target.closest('[data-mlist]'); if (!b) return;
+      const l = listOf(filter.slice(2)); if (!l) return;
+      if (b.dataset.mlist === 'rename') {
+        const name = (window.prompt(T('mu.renamePrompt'), l.name) || '').trim();
+        if (name) { l.name = name.slice(0, 30); saveLists(); renderTabs(); renderListHead(); }
+      } else if (b.dataset.mlist === 'delete') {
+        if (window.confirm(T('mu.delConfirm', { name: l.name }))) { lists = lists.filter(x => x !== l); saveLists(); filter = 'all'; renderTabs(); renderList(); }
+      }
+    });
+    $('#mSelBtn').addEventListener('click', () => setSelecting(!selecting));
+    $('#mSelCancel').addEventListener('click', () => setSelecting(false));
+    $('#mSelAdd').addEventListener('click', () => { if (picked.size) openSheet([...picked]); });
+    $('#mSheet').addEventListener('click', e => {
+      if (e.target.closest('[data-msheet-close]')) { closeSheet(); return; }
+      const b = e.target.closest('[data-msheet]');
+      if (b) {
+        if (!sheetIds.length) { filter = 'u:' + b.dataset.msheet; closeSheet(); renderTabs(); renderList(); return; }
+        addTo(b.dataset.msheet, sheetIds); closeSheet();
+        if (selecting) setSelecting(false); else { renderTabs(); renderList(); }
+      }
+    });
+    $('#mSheetForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const l = createList($('#mSheetName').value.trim().slice(0, 30), sheetIds);
+      closeSheet();
+      selecting = false; picked.clear();
+      filter = 'u:' + l.id; renderTabs(); renderList();
+    });
     let qT;
     $('#mSearch').addEventListener('input', e => { clearTimeout(qT); qT = setTimeout(() => { q = e.target.value.trim().toLowerCase(); renderList(); }, 120); });
     $('#mChar').addEventListener('click', e => { const id = e.currentTarget.dataset.char; if (!id) return; close(); setTimeout(() => Modal.open(id), 250); });
@@ -1830,10 +2213,17 @@
       const now = performance.now();
       if ('mediaSession' in navigator && navigator.mediaSession.setPositionState && audio.duration && now - posT > 1000) {
         posT = now;
-        try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: audio.currentTime }); } catch (e) {}
+        try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: Math.min(audio.currentTime, audio.duration) }); } catch (e) {}
+      }
+      /* 연속 재생: 곡이 완전히 끝나 '정지' 상태가 되기 직전에 다음 곡으로 넘긴다.
+         모바일은 화면이 꺼진 뒤 한 번 멈춘 오디오를 다시 켜지 못하게 막는 경우가 있어서,
+         재생이 끊기지 않은 채로 곡을 바꿔야 백그라운드에서도 이어진다 */
+      if (!advancing && repeat !== 'one' && !audio.paused && audio.duration && audio.duration - audio.currentTime < .3) {
+        advancing = true;
+        step(1, true);
       }
     });
-    audio.addEventListener('ended', () => { if (repeat === 'one') { audio.currentTime = 0; play(); } else step(1, true); });
+    audio.addEventListener('ended', () => { if (repeat === 'one') { audio.currentTime = 0; play(); } else if (!advancing) { advancing = true; step(1, true); } });
     audio.addEventListener('error', () => { if (loadedId) toast(T('mu.err')); });
 
     /* 아이폰 Safari 는 스크립트로 볼륨을 못 바꾼다 → 볼륨 바 대신 기기 버튼 사용 */
@@ -1847,10 +2237,12 @@
     return {
       open, close, toggle,
       get isOpen() { return !root.hidden && root.classList.contains('is-open'); },
+      get sheetOpen() { return !$('#mSheet').hidden; },
+      closeSheet,
       has: id => !!(byTid[id] && byTid[id].playable),
       get cur() { return cur; },
       titleOf: id => byTid[id] ? titleOf(byTid[id]) : '',
-      refresh() { paint(); if (!root.hidden) renderList(); }
+      refresh() { paint(); if (!root.hidden) { renderTabs(); renderList(); } }
     };
   })();
 
@@ -1871,7 +2263,8 @@
     if (Music.isOpen && !typing && e.code === 'Space') { e.preventDefault(); Music.toggle(); return; }
     if (e.key === 'Escape') {
       if (Palette.isOpen) Palette.close();
-      else if (Music.isOpen) Music.close();
+      else if (Cut.isOpen) Cut.skip();
+      else if (Music.isOpen) { if (Music.sheetOpen) Music.closeSheet(); else Music.close(); }
       else if (Domain.isOpen) Domain.close();
       else if (Modal.isOpen) Modal.close();
       else $('#hud').classList.remove('is-menu');

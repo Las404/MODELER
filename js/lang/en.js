@@ -229,6 +229,13 @@ window.MODELER_L10N = {
     'mu.rep.all': 'Repeat all', 'mu.rep.one': 'Repeat one', 'mu.rep.off': 'Repeat off',
     'mu.shuffleOn': 'Shuffle on', 'mu.shuffleOff': 'Shuffle off', 'mu.play': 'Play', 'mu.pause': 'Pause',
     'mu.playTheme': 'Play theme', 'mu.playRelease': 'Play release theme',
+    'dm.replay': 'Replay cutscene', 'cut.aria': 'Release cutscene',
+    'mu.select': 'Select', 'mu.cancel': 'Cancel', 'mu.addTo': 'Add to playlist', 'mu.newPh': 'Playlist name', 'mu.create': 'Create new',
+    'mu.newList': 'New playlist', 'mu.selCount': '{n} selected', 'mu.myLists': 'My playlist',
+    'mu.added': 'Added {n} to “{name}”.', 'mu.removed': 'Removed from “{name}”.', 'mu.created': 'Created playlist “{name}”.',
+    'mu.rename': 'Rename', 'mu.delete': 'Delete', 'mu.renamePrompt': 'New playlist name', 'mu.delConfirm': 'Delete the playlist “{name}”?',
+    'mu.listEmpty': 'No songs yet. In the “All” tab, tap ＋ next to a song to add it.', 'mu.removeFrom': 'Remove from this playlist',
+    'mu.noLists': 'You have no playlists yet. Create one below.', 'mu.defaultName': 'My playlist {n}',
     'pal.ph': 'Search modeler · model · faction',
     'rg.reset': 'Reset layout',
     'rs.title': 'All Relations at a Glance',
@@ -420,7 +427,7 @@ window.MODELER_L10N = {
           { n: 'Yata no Kagami', d: 'An octagonal bronze mirror. Fires light, or reflects an opponent\'s ability back at them.' },
           { n: 'Gold-nibbed fountain pen' }, { n: 'Leather notebook filled with nothing but names' }, { n: 'Gold pocket watch' }
         ],
-        release: { name: 'Opening of the Heavenly Rock Door', desc: 'A pitch-black cave. Light pours through the gap in a stone door. Anyone touched by the light has their shadow erased: stealth, ambush, and evasion become impossible, and every action is exposed in advance.' },
+        release: { name: 'Opening of the Heavenly Rock Door', lines: ['……I have already seen every shadow you cast.', 'Release — “Opening of the Heavenly Rock Door.” Under this light, nothing can hide.'], desc: 'A pitch-black cave. Light pours through the gap in a stone door. Anyone touched by the light has their shadow erased: stealth, ambush, and evasion become impossible, and every action is exposed in advance.' },
         bg: 'Thirty years ago, her name was on the approval line of the experiment plan — a direct party to the cover-up. She is also the one who copies out the list of victims by hand every year. Though she could earn a higher grade, she keeps herself locked at S and refuses re-evaluation.'
       },
       kurosawa: {
@@ -471,7 +478,7 @@ window.MODELER_L10N = {
           { n: 'Totsuka no Tsurugi', d: 'A straight sword broken halfway down the blade. Can split a single cut on its target into as many as eight.' },
           { n: 'Battle-record notebook' }, { n: 'A lighter he keeps getting confiscated and stealing back' }
         ],
-        release: { name: 'Eight-Forked Serpent God', desc: 'A storm-lashed riverbank. The shadow of an eight-headed serpent covers the sky. All eight escape routes are sealed, and his every slash splits into eight that strike at once.' },
+        release: { name: 'Eight-Forked Serpent God', lines: ['Hah. Capture, whatever — it’s a pain.', 'Release — “Eight-Forked Serpent God.” All eight ways out, sealed. Got anywhere to run?'], desc: 'A storm-lashed riverbank. The shadow of an eight-headed serpent covers the sky. All eight escape routes are sealed, and his every slash splits into eight that strike at once.' },
         bg: 'Many Catastrophe-class kills — and the most disciplinary actions in the company. Suspended several times for publicly criticizing the Capture-First Principle. He and Amagi despise each other, yet join hands when it matters.'
       },
       nikaido: {
@@ -598,7 +605,7 @@ window.MODELER_L10N = {
           { n: 'Tongue of Laufey', d: 'Makes one thing he has said aloud come true. Once a day. Not even he can undo it.' },
           { n: 'The leather cord that once sewed his mouth shut' }, { n: 'Silver dagger' }
         ],
-        release: { name: 'Myriad Transformations', desc: 'A space of green emerald on every side. Light reflects off every facet, layering countless images. Within it, Ashiya can become anything he can imagine — a person, a beast, an object, even someone standing right there. Every reflection looks like him, so no one can tell which one is real.' },
+        release: { name: 'Myriad Transformations', lines: ['Ahh, now it’s finally getting fun.', 'Release — “Myriad Transformations.” Now then — which one of us is the real me?'], desc: 'A space of green emerald on every side. Light reflects off every facet, layering countless images. Within it, Ashiya can become anything he can imagine — a person, a beast, an object, even someone standing right there. Every reflection looks like him, so no one can tell which one is real.' },
         bg: 'The architect of Ragnarök. Records say he was a test subject at a Pantheon facility; he neither confirms nor denies it. The marks around his mouth came from the experiments — made "so he couldn\'t speak." He took in every member himself, and they are the only people he never lies to.'
       },
       kuga: {
@@ -611,7 +618,7 @@ window.MODELER_L10N = {
           { n: 'His Own Body', d: 'He cannot hold belongings. His body itself is his manifestation.' },
           { n: 'Remnants of Gleipnir', d: 'A broken chain. If it comes fully undone, he goes from Catastrophe-class to Apocalypse-class.' }
         ],
-        release: { name: 'Chainbreak', desc: 'A wasteland where the moon has been swallowed. The domain opens with the sound of chains snapping. Everything inside is fated to be devoured: all healing, regeneration, and recovery are nullified.' },
+        release: { name: 'Chainbreak', lines: ['……Toki. Chains. Break.', '……“Chainbreak.” Everything. Eat.'], desc: 'A wasteland where the moon has been swallowed. The domain opens with the sound of chains snapping. Everything inside is fated to be devoured: all healing, regeneration, and recovery are nullified.' },
         bg: 'The only success of a forced model transplant — the result of artificially manifesting the then-vacant Fenrir. No real name, no record of origin, no memory of life before the transplant. The Pantheon classifies him as a "specimen" and exempts him from the Capture-First Principle.'
       },
       hiiragi: {
@@ -624,7 +631,7 @@ window.MODELER_L10N = {
           { n: 'Gate of Niflheim', d: 'Whatever she touches is treated as "already dead" and slowly stops functioning. Not instant death — a slow halt.' },
           { n: 'Withered bouquet' }, { n: 'Black book filled with a register of the dead' }
         ],
-        release: { name: 'Éljúðnir', desc: 'The interior of a vast frost-covered mansion. The dead sit at a long table. Anyone who enters is registered as a "guest," and may leave only with her permission.' },
+        release: { name: 'Éljúðnir', lines: ['Your heart is beating rather fast. ……It will stop soon.', 'Release — “Éljúðnir.” Welcome, guest. To leave, you will need my permission.'], desc: 'The interior of a vast frost-covered mansion. The dead sit at a long table. Anyone who enters is registered as a "guest," and may leave only with her permission.' },
         bg: 'The tally of Ragnarök\'s ten thousand sacrifices is written in her ledger. Records list her as the only subject at a Pantheon facility to "come back after being declared dead," and the left half of her body is still as dead as it was then.'
       },
       kuroiwa: {
@@ -637,7 +644,7 @@ window.MODELER_L10N = {
           { n: 'Kynee', d: 'Unfold the headband into a helmet and she vanishes. Invisible even to aether detection — not even the Pantheon ops room can track her.' },
           { n: 'Obsidian key' }, { n: 'A single pomegranate' }
         ],
-        release: { name: 'Pomegranate Pact', desc: 'Underground where no light reaches: a pale field of asphodel. Every attack or use of power inside piles up a "debt," and past a certain point you cannot leave even after the domain closes.' },
+        release: { name: 'Pomegranate Pact', lines: ['……Let us make a contract. You will be the one to strike first.', 'Release — “Pomegranate Pact.” Debts are always repaid.'], desc: 'Underground where no light reaches: a pale field of asphodel. Every attack or use of power inside piles up a "debt," and past a certain point you cannot leave even after the domain closes.' },
         bg: 'Officer in charge of the plan to abduct flagship-class holders. The only member of Muspell who openly opposes Ashiya\'s methods. She does not agree with exterminating humanity — yet, for some reason, she cannot leave.'
       },
       akazawa: {
@@ -690,7 +697,7 @@ window.MODELER_L10N = {
           { n: 'Shield of Hephaestus' },
           { n: 'Red cord on the right ankle', d: 'Hides his one weakness. He has told no one.' }
         ],
-        release: { name: 'Thrice-Round Pursuit', desc: 'A battlefield ringed by enormous walls. Inside, no one can run from him — he always catches up. Nor can he be wounded at all. The right ankle alone is the exception, and inside the domain, that weakness is visible to his opponent too.' },
+        release: { name: 'Thrice-Round Pursuit', lines: ['I don’t need an explanation. Move.', 'Release — “Thrice-Round Pursuit.” Go on, run. I’ll catch you within three laps.'], desc: 'A battlefield ringed by enormous walls. Inside, no one can run from him — he always catches up. Nor can he be wounded at all. The right ankle alone is the exception, and inside the domain, that weakness is visible to his opponent too.' },
         bg: 'The only unaffiliated S-grade, and capable of Release. The person the Pantheon tries hardest to recruit. He was once Pantheon, but quit when the organization covered up a comrade\'s death — and still won\'t say that comrade\'s name.'
       },
       shirasaki: {
@@ -755,7 +762,7 @@ window.MODELER_L10N = {
           { n: 'Gungnir', d: 'Sealed in the form of a rune staff.' },
           { n: 'Huginn and Muninn', d: 'Two ravens. They circle the world and bring back information.' }
         ],
-        release: { name: 'Nine Nights on the Hanging Tree', desc: 'A gray world where a giant ash tree stands. Everything inside is read by him — next move, memories, weaknesses. In exchange, each time the domain ends, he loses one of his own memories.' },
+        release: { name: 'Nine Nights on the Hanging Tree', lines: ['……The price has already been paid. A memory or so.', 'Release — “Nine Nights on the Hanging Tree.” Your next move, guest, has already been read.'], desc: 'A gray world where a giant ash tree stands. Everything inside is read by him — next move, memories, weaknesses. In exchange, each time the domain ends, he loses one of his own memories.' },
         bg: 'He dwells in the boundary space, and no one can go to him. Contact always comes from his side — the one reason the Oracle has never been breached. The Pantheon and Muspell both buy from him, and he sells to both at the same price.'
       },
       fumizuki: {

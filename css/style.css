@@ -1722,3 +1722,14 @@ body.is-cut .dock { transform: translateY(110%); }
   .music__selbar { left: 12px; right: 12px; transform: none; justify-content: flex-end; }
   .music__selbar span { margin-right: auto; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   PC: 플레이리스트 태그 줄에 가로 스크롤바 (모바일은 손가락으로 밀기)
+   ════════════════════════════════════════════════════════════ */
+@media (hover: hover) and (pointer: fine) {
+  .music__tabs { scrollbar-width: thin; scrollbar-color: rgba(var(--accent-rgb), .55) rgba(255, 255, 255, .06); padding-bottom: 12px; }
+  .music__tabs::-webkit-scrollbar { display: block; height: 8px; }
+  .music__tabs::-webkit-scrollbar-track { background: rgba(255, 255, 255, .06); border-radius: 8px; margin: 0 14px; }
+  .music__tabs::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb), .45); border-radius: 8px; border: 0; }
+  .music__tabs::-webkit-scrollbar-thumb:hover { background: rgba(var(--accent-rgb), .75); }
+}

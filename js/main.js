@@ -2151,6 +2151,13 @@
       cur = t.id; setBase(filtered()); play(t.id);
     });
     $('#mTracks').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('mt')) e.target.click(); });
+    /* PC 마우스 휠(세로)로도 태그 줄이 옆으로 넘어가게 */
+    $('#mTabs').addEventListener('wheel', e => {
+      const el = e.currentTarget;
+      if (el.scrollWidth <= el.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    }, { passive: false });
     $('#mTabs').addEventListener('click', e => {
       if (e.target.closest('[data-mnew]')) { openSheet(selecting ? [...picked] : []); return; }
       const b = e.target.closest('[data-mg]'); if (!b) return;

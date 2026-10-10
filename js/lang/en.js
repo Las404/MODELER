@@ -536,16 +536,16 @@ window.MODELER_L10N = {
       },
       bando: {
         name: 'Tsuyoshi Bando', role: 'Top Fighter', model: 'Heracles',
-        look: 'Huge build, short brown crew cut, thick eyebrows, square jaw, amber eyes, bandage on the left cheekbone, lion-pelt pattern tattoos on both arms and back, sleeveless gray hoodie, tawny fur draped over the shoulders, leather wrist guards, black sweatpants, sandals on bare feet',
-        persona: ['Honest to a fault', 'Simple', 'Crybaby', 'Always keeps his promises', 'Leaves all the thinking to others'],
+        look: 'Lean, muscular build, long sky-blue hair, yellow eyes, square jaw, bandage on the left cheekbone, lion-pelt pattern tattoos on both arms and back, dark gray jacket over a black tank top, black gloves, black sweatpants, sneakers',
+        persona: ['Honest to a fault', 'Simple', 'Short-tempered', 'Always keeps his promises', 'Leaves all the thinking to others'],
         speech: 'Loud, casual speech; asks again when words get difficult; feelings come before words; addresses people as "Mr./Ms. ○○," carefully',
-        quote: 'Uh, so, I just smash that thing, right? ……Don\'t make it complicated. I won\'t get it.',
+        quote: '……Just get to the point. I sweep all of those away, right?',
         items: [
           { n: 'Hide of the Nemean Lion', d: 'No attack works on whatever part of him it covers.' },
           { n: 'Oak club', d: 'Too heavy to carry around; usually propped up at the office.' },
           { n: 'Protein supplements' }, { n: 'A wallet with a photo of his nephew' }
         ],
-        bg: 'A-grade on raw strength alone. He turned down every Pantheon scout: "I like the people here better." He failed the Pantheon entrance exam three times, and tears up whenever it comes up.'
+        bg: 'A-grade on raw strength alone. He turned down every Pantheon scout: "I like the people here better." He failed the Pantheon entrance exam three times, and his face hardens whenever it comes up.'
       },
       fushimi: {
         name: 'Akane Fushimi', role: 'Accounts & Supply', model: 'Inari',
